@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing — CR Data Entry</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--p1:#782D55;--p3:#5C243F;--bg:#f6f3ee;--text:#2a1520;--muted:#7a6a72;--ok:#27ae60;--warn:#e67e22;--risk:#c0392b}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);font-size:12px;min-height:100vh}
+.topbar{background:#bf360c;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:12px}
+.topbar h1{font-size:15px;font-weight:700}
+.topbar p{font-size:10px;opacity:0.8;margin-top:2px}
+.back-link{margin-left:auto;color:#fff;font-size:10px;text-decoration:none;background:rgba(255,255,255,0.15);padding:5px 12px;border-radius:14px}
+.back-link:hover{background:rgba(255,255,255,0.25)}
+.save-bar{background:#fbe9e7;border-bottom:2px solid #ff8a65;padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:10px}
+.save-indicator{font-weight:700;color:#bf360c}
+.content{padding:16px 20px}
+.info-box{background:#fff;border:1px solid #ff8a65;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:11px;color:#bf360c;line-height:1.6}
+.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid #ffccbc;background:#fff}
+table{border-collapse:collapse;font-size:11px;min-width:750px;width:100%}
+thead th{background:#bf360c;color:#fff;padding:8px 10px;text-align:left;font-size:9px;letter-spacing:0.4px;white-space:nowrap;position:sticky;top:0;z-index:2}
+thead th.core{background:#d84315}
+tbody tr:hover{background:#fff8f6}
+tbody tr td{padding:6px 10px;border-bottom:1px solid #fbe9e7;vertical-align:middle}
+.cr-id{font-weight:700;color:var(--p1);font-size:10px}
+.cr-name{font-weight:600;color:var(--p3);line-height:1.3}
+.badge{padding:2px 7px;border-radius:8px;font-size:8px;font-weight:700}
+.badge-dep{background:#e8f5e9;color:#1b5e20}
+.badge-dev{background:#e3f2fd;color:#0d47a1}
+.badge-hold{background:#fff8e1;color:#e65100}
+.badge-other{background:#f5f5f5;color:#616161}
+.badge-pub{background:#e8f5e9;color:#1b5e20}
+.badge-int{background:#e3f2fd;color:#0d47a1}
+.badge-ext{background:#f3e5f5;color:#4a148c}
+.badge-mkt-na{background:#f5f5f5;color:#616161}
+.badge-mkt-hold{background:#fff8e1;color:#e65100}
+.edit-select{width:100%;border:1px solid #ffccbc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:'Cairo',sans-serif;background:#fff;cursor:pointer}
+.edit-select:focus{outline:none;border-color:#bf360c}
+.notes-input{width:100%;border:1px solid #ffccbc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:'Cairo',sans-serif;background:#fff}
+.notes-input:focus{outline:none;border-color:#bf360c}
+.btn{padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid;font-family:'Cairo',sans-serif;font-weight:600}
+.btn-primary{background:#bf360c;color:#fff;border-color:#bf360c}
+.btn:hover{opacity:0.85}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>Marketing — CR Publish Status Input</h1>
+    <p>Update marketing / publish status for each deployed CR. Changes save automatically.</p>
+  </div>
+  <a href="index.html" class="back-link">← Main Dashboard</a>
+</div>
+
+<div class="save-bar">
+  <span class="save-indicator" id="save-ind">Loading…</span>
+  <button class="btn btn-primary" style="font-size:10px;padding:4px 12px" onclick="forceSave()">Save Now</button>
+  <span style="color:var(--muted);margin-left:8px">Your column: <strong>Marketing</strong></span>
+</div>
+
+<div class="content">
+  <div class="info-box">
+    <strong>Marketing Team Instructions:</strong> Set the Marketing status for each CR.
+    Options: NA · Published · Internal Post · External Post · On Hold
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="core">#</th>
+          <th class="core">CR No.</th>
+          <th class="core" style="min-width:240px">Project Name</th>
+          <th class="core">Project Status</th>
+          <th class="core">Deploy Status</th>
+          <th class="core">Deploy Due</th>
+          <th>Marketing</th>
+        </tr>
+      </thead>
+      <tbody id="mkt-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const LS_KEY='cl_alnadeeb_crs_v2';
+let crs=[];
+const MKT_OPTS=[{v:'NA',l:'NA'},{v:'published',l:'Published'},{v:'Internal Post',l:'Internal Post'},{v:'External Post',l:'External Post'},{v:'on hold',l:'On Hold'}];
+
+function statusBadge(s){
+  if(!s) return '<span class="badge badge-other">—</span>';
+  const m={Deployed:'badge-dep',Development:'badge-dev','On Hold':'badge-hold',Testing:'badge-dev','Ready for Deployment':'badge-dep'};
+  return `<span class="badge ${m[s]||'badge-other'}">${s}</span>`;
+}
+function mktBadge(v){
+  if(!v||v==='NA') return '<span class="badge badge-mkt-na">NA</span>';
+  if(v==='published') return '<span class="badge badge-pub">Published</span>';
+  if(v==='Internal Post') return '<span class="badge badge-int">Internal Post</span>';
+  if(v==='External Post') return '<span class="badge" style="background:#f3e5f5;color:#4a148c">External Post</span>';
+  if(v==='on hold') return '<span class="badge badge-mkt-hold">On Hold</span>';
+  return `<span class="badge badge-other">${v}</span>`;
+}
+function sel(field,idx){
+  const cur=crs[idx][field]||'NA';
+  return `<select class="edit-select" onchange="update(${idx},'${field}',this.value)">${MKT_OPTS.map(o=>`<option value="${o.v}"${o.v===cur?' selected':''}>${o.l}</option>`).join('')}</select>`;
+}
+function render(){
+  document.getElementById('mkt-tbody').innerHTML=crs.map((cr,i)=>`<tr>
+    <td style="color:var(--muted);text-align:center;font-size:10px">${i+1}</td>
+    <td class="cr-id">${cr.crNo||cr.id}</td>
+    <td class="cr-name">${cr.name}</td>
+    <td>${statusBadge(cr.projectStatus)}</td>
+    <td>${statusBadge(cr.deploymentStatus)||'<span style="color:var(--muted);font-size:10px">—</span>'}</td>
+    <td style="font-size:10px;color:var(--muted)">${cr.deploymentDue||'—'}</td>
+    <td>${sel('marketing',i)}</td>
+  </tr>`).join('');
+}
+function update(idx,field,val){crs[idx][field]=val;save();}
+function save(){
+  localStorage.setItem(LS_KEY,JSON.stringify(crs));
+  const now=new Date();
+  document.getElementById('save-ind').textContent='✓ Saved at '+now.toTimeString().slice(0,5);
+  document.getElementById('save-ind').style.color='var(--ok)';
+}
+function forceSave(){save();}
+function load(){
+  const s=localStorage.getItem(LS_KEY);
+  if(s){try{crs=JSON.parse(s);}catch(e){crs=[];}}
+  if(!crs.length){document.getElementById('save-ind').textContent='⚠ No data — open Main Dashboard first';document.getElementById('save-ind').style.color='var(--warn)';return;}
+  document.getElementById('save-ind').textContent='✓ Loaded '+crs.length+' CRs';
+  document.getElementById('save-ind').style.color='var(--ok)';
+  render();
+}
+load();
+</script>
+</body>
+</html>

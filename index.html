@@ -263,8 +263,8 @@ input[type=file]{display:none}
 .cf-risk{background:#ffebee;color:#b71c1c}
 
 /* Expand detail */
-.cr-detail-panel{max-height:0;overflow:hidden;transition:max-height 0.3s ease}
-.cr-detail-panel.open{max-height:400px}
+.cr-detail-panel{max-height:0;overflow:hidden;transition:max-height 0.4s ease}
+.cr-detail-panel.open{max-height:900px}
 .cr-detail-inner{padding:12px 14px;background:#fdf9f6;border-top:1px solid #f0ebe5}
 .cr-expand-btn{width:100%;background:none;border:none;border-top:1px solid #f5ede8;padding:6px;cursor:pointer;font-size:10px;color:var(--muted);font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:background 0.1s}
 .cr-expand-btn:hover{background:#fdf9f6;color:var(--p1)}
@@ -275,6 +275,50 @@ input[type=file]{display:none}
 .alloc-team-csi{background:#fce4ec}
 .alloc-team-tt{background:#e8eaf6}
 .alloc-team-qa{background:#e0f2f1}
+
+/* SAVE BADGE */
+.save-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:9px;font-weight:600;transition:all 0.4s;white-space:nowrap}
+.save-badge.saved{background:#e8f5e9;color:#1b5e20}
+.save-badge.unsaved{background:#fff8e1;color:#e65100}
+.save-badge.saving{background:#e3f2fd;color:#0d47a1}
+
+/* DATA MANAGER */
+.dm-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px;max-height:70vh;overflow-y:auto}
+.dm-table{border-collapse:collapse;font-size:10px;white-space:nowrap}
+.dm-table th{background:var(--p3);color:#fff;padding:6px 8px;text-align:left;font-size:8px;letter-spacing:0.3px;font-weight:700;position:sticky;top:0;z-index:2;cursor:default}
+.dm-table th.dm-sec-csi{background:#880e4f}
+.dm-table th.dm-sec-tt{background:#1a237e}
+.dm-table th.dm-sec-qa{background:#004d40}
+.dm-table th.dm-sec-final{background:#4a148c}
+.dm-table td{padding:5px 8px;border-bottom:1px solid #f5efe8;vertical-align:middle;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.dm-table tr:hover td{background:#fdf9f6}
+.dm-table tr.dm-editing td{background:#fff8e1}
+.dm-edit-cell{width:100%;border:1px solid var(--p1);border-radius:3px;padding:2px 4px;font-size:10px;font-family:'Cairo',sans-serif;background:#fff;min-width:80px}
+.dm-sel-cell{width:100%;border:1px solid var(--p1);border-radius:3px;padding:2px 4px;font-size:10px;font-family:'Cairo',sans-serif;background:#fff}
+.dm-status-done{background:#e8f5e9;color:#1b5e20;padding:1px 6px;border-radius:8px;font-size:8px;font-weight:700}
+.dm-status-ip{background:#e3f2fd;color:#0d47a1;padding:1px 6px;border-radius:8px;font-size:8px;font-weight:700}
+.dm-status-pend{background:#f5f5f5;color:#616161;padding:1px 6px;border-radius:8px;font-size:8px;font-weight:700}
+.dm-status-hold{background:#fff8e1;color:#e65100;padding:1px 6px;border-radius:8px;font-size:8px;font-weight:700}
+.dm-btn-row{display:flex;gap:6px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+
+/* TEAM SECTION HEADERS IN EXPANDED CARD */
+.team-sec{margin-bottom:8px;border-radius:6px;overflow:hidden;border:1px solid #e8e0d8}
+.team-sec-hdr{font-size:9px;font-weight:800;padding:5px 10px;display:flex;gap:8px;align-items:center}
+.team-sec-body{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px 10px;background:#fafafa}
+.team-sec-body.two-col{grid-template-columns:1fr 1fr}
+.team-sec-body.four-col{grid-template-columns:repeat(4,1fr)}
+.tsf{font-size:8px;line-height:1.5}
+.tsf-label{color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;font-size:7px;display:block}
+.tsf-val{font-weight:700;color:var(--p3);display:block}
+.tsf-val.done{color:var(--ok)}
+.tsf-val.ip{color:var(--info)}
+.tsf-val.hold{color:var(--warn)}
+.tsf-val.empty{color:#ccc;font-style:italic}
+.hdr-csi{background:#fce4ec;color:#880e4f}
+.hdr-review{background:#f3e5f5;color:#4a148c}
+.hdr-tt{background:#e8eaf6;color:#1a237e}
+.hdr-qa{background:#e0f2f1;color:#004d40}
+.hdr-final{background:#ede7f6;color:#311b92}
 </style>
 </head>
 <body>
@@ -296,11 +340,12 @@ input[type=file]{display:none}
   <div class="nav-item" onclick="showPage('timeline',this)">▪ Timeline / Gantt</div>
   <div class="nav-item" onclick="showPage('risks',this)">▪ Risks & Notes</div>
   <div class="nav-section">Alnadeeb CRs</div>
-  <div class="nav-item" onclick="showPage('cr-overview',this)">▪ CR Dashboard <span class="nav-badge" id="nav-cr-count">44</span></div>
+  <div class="nav-item" onclick="showPage('cr-overview',this)">▪ CR Dashboard <span class="nav-badge" id="nav-cr-count">52</span></div>
   <div class="nav-item" onclick="showPage('cr-list',this)">▪ CR List</div>
   <div class="nav-item" onclick="showPage('cr-cards',this)">▪ CR Cards</div>
   <div class="nav-item" onclick="showPage('allocation',this)">▪ Team Allocation</div>
   <div class="nav-section">Data</div>
+  <div class="nav-item" onclick="showPage('data-manager',this)">▪ CR Data Manager</div>
   <div class="nav-item" onclick="showPage('import',this)">▪ Import / Export</div>
   <div class="sidebar-footer" id="sidebar-period">Period: 2024 – 2026<br>Last updated: May 2025</div>
 </div>
@@ -310,6 +355,7 @@ input[type=file]{display:none}
 <div class="topbar">
   <div class="topbar-title" id="page-title">Sector Overview</div>
   <div class="period-badge" id="topbar-period">📅 Jan 2024 – Dec 2026</div>
+  <span class="save-badge saved" id="save-badge" title="Data is stored in your browser's localStorage">✓ Ready</span>
   <select class="filter-sel" id="global-year" onchange="globalFilter(this.value)" style="width:90px">
     <option value="all">All Years</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
   </select>
@@ -326,7 +372,7 @@ input[type=file]{display:none}
     <div class="stat-card info"><div class="stat-label">IT Sector Projects</div><div class="stat-value" id="ov-total">6</div><div class="stat-sub">Total active projects</div></div>
     <div class="stat-card ok"><div class="stat-label">On Track</div><div class="stat-value" id="ov-ontrack" style="color:var(--ok)">4</div><div class="stat-sub">Projects on schedule</div></div>
     <div class="stat-card warn"><div class="stat-label">At Risk / Delayed</div><div class="stat-value" id="ov-risk" style="color:var(--warn)">2</div><div class="stat-sub">Need attention</div></div>
-    <div class="stat-card"><div class="stat-label">CR Overall Progress</div><div class="stat-value" id="ov-cr-prog" style="color:var(--p1)">58%</div><div class="stat-sub">Avg across all 44 CRs</div></div>
+    <div class="stat-card"><div class="stat-label">CR Overall Progress</div><div class="stat-value" id="ov-cr-prog" style="color:var(--p1)">—%</div><div class="stat-sub" id="ov-cr-sub">Avg across all CRs</div></div>
     <div class="stat-card risk"><div class="stat-label">Delay Risk CRs</div><div class="stat-value" id="ov-delay-cr" style="color:var(--risk)">7</div><div class="stat-sub">Behind schedule ≥1 week</div></div>
   </div>
 
@@ -338,7 +384,7 @@ input[type=file]{display:none}
     </div>
     <!-- CR Projects by Phase Status — count per phase -->
     <div class="card">
-      <div class="card-title"><div class="card-title-left">CR Projects by Status</div><div style="font-size:9px;color:var(--muted)" id="cr-total-label">Total: 44</div></div>
+      <div class="card-title"><div class="card-title-left">CR Projects by Status</div><div style="font-size:9px;color:var(--muted)" id="cr-total-label">Total: 52</div></div>
       <div id="ov-phase-status"></div>
     </div>
   </div>
@@ -651,6 +697,57 @@ input[type=file]{display:none}
   </div>
 </div>
 
+<!-- ═══════════════ CR DATA MANAGER ═══════════════ -->
+<div id="page-data-manager" class="page">
+  <div class="dm-btn-row">
+    <button class="btn btn-primary" onclick="openAddCRModal()">+ Add CR</button>
+    <button class="btn btn-outline" onclick="exportDataManagerXLSX()">↓ Export All to Excel</button>
+    <span style="font-size:10px;color:var(--muted);margin-left:8px">Click any row's Edit button to update that CR. Changes auto-save to browser storage.</span>
+  </div>
+  <div class="dm-wrap">
+    <table class="dm-table">
+      <thead>
+        <tr>
+          <th rowspan="2" style="min-width:30px">#</th>
+          <th rowspan="2" style="min-width:80px">CR No.</th>
+          <th rowspan="2" style="min-width:180px">Project Name</th>
+          <th rowspan="2" style="min-width:80px">Status</th>
+          <th rowspan="2" style="min-width:60px">Complexity</th>
+          <th class="dm-sec-csi" colspan="7">CSI Team</th>
+          <th class="dm-sec-tt" colspan="6">TT Team</th>
+          <th class="dm-sec-qa" colspan="4">QA Team</th>
+          <th class="dm-sec-final" colspan="4">Training / Deploy / Mkt</th>
+          <th rowspan="2" style="min-width:70px">Actions</th>
+        </tr>
+        <tr>
+          <th class="dm-sec-csi">SOW Status</th>
+          <th class="dm-sec-csi">BRD Due</th>
+          <th class="dm-sec-csi">BRD Status</th>
+          <th class="dm-sec-csi">BA MD</th>
+          <th class="dm-sec-csi">BA</th>
+          <th class="dm-sec-csi">BRD Review</th>
+          <th class="dm-sec-csi">GAC</th>
+          <th class="dm-sec-tt">DDS Status</th>
+          <th class="dm-sec-tt">DDS Due</th>
+          <th class="dm-sec-tt">TT MD</th>
+          <th class="dm-sec-tt">TT Members</th>
+          <th class="dm-sec-tt">Dev Status</th>
+          <th class="dm-sec-tt">Dev Due</th>
+          <th class="dm-sec-qa">Int.Test Status</th>
+          <th class="dm-sec-qa">Int.Test Due</th>
+          <th class="dm-sec-qa">QA Member</th>
+          <th class="dm-sec-qa">UAT Status</th>
+          <th class="dm-sec-final">UAT Due</th>
+          <th class="dm-sec-final">Training</th>
+          <th class="dm-sec-final">Deploy Status</th>
+          <th class="dm-sec-final">Deploy Due</th>
+        </tr>
+      </thead>
+      <tbody id="dm-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
 </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /shell -->
@@ -706,11 +803,23 @@ input[type=file]{display:none}
 
 <!-- Add CR -->
 <div class="modal-overlay" id="modal-add-cr">
-<div class="modal" style="width:720px">
+<div class="modal" style="width:780px">
   <h3 id="modal-cr-title">Add CR Project</h3>
+
+  <!-- Core info -->
+  <div class="section-divider" style="margin-top:0">Project Info</div>
   <div class="form-grid">
-    <div class="form-row"><label>CR ID</label><input type="text" id="cr-f-id" placeholder="CR-2025-045"></div>
-    <div class="form-row"><label>CR Name</label><input type="text" id="cr-f-name" placeholder="Change request title"></div>
+    <div class="form-row"><label>CR No. (official)</label><input type="text" id="cr-f-crno" placeholder="CR240006"></div>
+    <div class="form-row"><label>Project Name (English)</label><input type="text" id="cr-f-name" placeholder="GCC Customs Tariff…"></div>
+    <div class="form-row"><label>اسم المشروع (Arabic)</label><input type="text" id="cr-f-namear" dir="rtl" placeholder="تطبيق التعرفة…"></div>
+    <div class="form-row"><label>Project Status</label>
+      <select id="cr-f-pstatus">
+        <option>Deployed</option><option>Development</option><option>Testing</option>
+        <option>Ready for Deployment</option><option>On Hold</option>
+        <option>Analysis</option><option>Development Queued</option><option>In Pipeline</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Complexity</label><select id="cr-f-complex"><option>High</option><option selected>Medium</option><option>Low</option></select></div>
     <div class="form-row"><label>Category</label>
       <select id="cr-f-cat">
         <option value="CSI">Continuous Service Improvement</option>
@@ -720,18 +829,78 @@ input[type=file]{display:none}
         <option value="DIG">Digital Transformation</option>
       </select>
     </div>
-    <div class="form-row"><label>Year</label><select id="cr-f-year"><option>2024</option><option selected>2025</option><option>2026</option></select></div>
-    <div class="form-row"><label>Current Phase</label><select id="cr-f-phase"><option value="1">Phase 1 - BA</option><option value="2">Phase 2 - Dev</option><option value="3">Phase 3 - QA</option><option value="4">Phase 4 - UAT</option><option value="5">Phase 5 - Deploy</option></select></div>
-    <div class="form-row"><label>Complexity</label><select id="cr-f-complex"><option>High</option><option selected>Medium</option><option>Low</option></select></div>
+    <div class="form-row"><label>Year</label><select id="cr-f-year"><option>2023</option><option>2024</option><option selected>2025</option><option>2026</option></select></div>
+    <div class="form-row"><label>CR/SOW Status</label>
+      <select id="cr-f-sowstatus"><option>Approved</option><option>Pending Signature</option><option>Not Started</option></select>
+    </div>
   </div>
-  <div class="section-divider">Flags</div>
+
+  <!-- CSI Team -->
+  <div class="section-divider" style="background:#fce4ec;color:#880e4f;border-radius:4px;padding:5px 10px">CSI Team — Business Analysis</div>
+  <div class="form-grid">
+    <div class="form-row"><label>BRD Due Date</label><input type="date" id="cr-f-brdduedate"></div>
+    <div class="form-row"><label>BRD Status</label>
+      <select id="cr-f-brdstatus"><option value="">—</option><option>Done</option><option>In Progress</option><option>Not Started</option></select>
+    </div>
+    <div class="form-row"><label>BA Mandays</label><input type="number" id="cr-f-bamd" min="0" placeholder="0"></div>
+    <div class="form-row"><label>BA (Name)</label><input type="text" id="cr-f-ba" placeholder="e.g. Noor"></div>
+  </div>
+  <div class="form-grid">
+    <div class="form-row"><label>BRD Internal Review (QA, TT)</label>
+      <select id="cr-f-brdreview"><option value="">—</option><option>Done</option><option>In Progress</option><option>Not Started</option></select>
+    </div>
+    <div class="form-row"><label>BRD GAC Approval</label>
+      <select id="cr-f-gac"><option value="">—</option><option>Approved</option><option>Done</option><option>In Progress</option><option>Not Started</option></select>
+    </div>
+  </div>
+
+  <!-- TT Team -->
+  <div class="section-divider" style="background:#e8eaf6;color:#1a237e;border-radius:4px;padding:5px 10px">TT Team — Development & Deployment</div>
+  <div class="form-grid">
+    <div class="form-row"><label>DDS Status</label>
+      <select id="cr-f-ddsstatus"><option value="">—</option><option>Done</option><option>In Progress</option><option>Not Started</option><option>NA</option></select>
+    </div>
+    <div class="form-row"><label>DDS Due Date</label><input type="date" id="cr-f-ddsdue"></div>
+    <div class="form-row"><label>TT Mandays</label><input type="number" id="cr-f-ttmd" min="0" step="0.01" placeholder="0"></div>
+    <div class="form-row"><label>TT Members</label><input type="text" id="cr-f-ttmembers" placeholder="e.g. Praveen, Naresh"></div>
+    <div class="form-row"><label>Dev. Status</label>
+      <select id="cr-f-devstatus"><option value="">—</option><option>Done</option><option>In Progress</option><option>Not Started</option><option>On Hold</option></select>
+    </div>
+    <div class="form-row"><label>Dev. Due Date</label><input type="date" id="cr-f-devdue"></div>
+  </div>
+  <div class="form-grid">
+    <div class="form-row"><label>Deployment Status</label>
+      <select id="cr-f-depstatus"><option value="">—</option><option>Done</option><option>In Progress</option><option>Not Started</option></select>
+    </div>
+    <div class="form-row"><label>Deployment Due Date</label><input type="date" id="cr-f-depdue"></div>
+  </div>
+
+  <!-- QA Team -->
+  <div class="section-divider" style="background:#e0f2f1;color:#004d40;border-radius:4px;padding:5px 10px">QA Team — Testing & UAT</div>
+  <div class="form-grid">
+    <div class="form-row"><label>Internal Test Status</label>
+      <select id="cr-f-itstatus"><option value="">—</option><option>Done</option><option>In Progress</option><option>Not Started</option></select>
+    </div>
+    <div class="form-row"><label>Internal Test Due Date</label><input type="date" id="cr-f-itdue"></div>
+    <div class="form-row"><label>QA Member</label><input type="text" id="cr-f-qamember" placeholder="e.g. Ragep"></div>
+    <div class="form-row"><label>UAT Status</label>
+      <select id="cr-f-uatstatus"><option value="">—</option><option>Done</option><option>In Progress</option><option>Not Started</option><option>On Hold</option></select>
+    </div>
+    <div class="form-row"><label>UAT Due Date</label><input type="date" id="cr-f-uatdue"></div>
+  </div>
+
+  <!-- Training & Marketing -->
+  <div class="section-divider" style="background:#ede7f6;color:#311b92;border-radius:4px;padding:5px 10px">Training & Marketing</div>
   <div class="form-grid-3">
-    <div class="form-row"><label>SOW Approved</label><select id="cr-f-sow"><option>Yes</option><option>No</option></select></div>
-    <div class="form-row"><label>Training Session</label><select id="cr-f-train"><option>Yes</option><option>No</option></select></div>
-    <div class="form-row"><label>Marketing Publish</label><select id="cr-f-mkt"><option>NA</option><option>Internal Post</option><option>External Post</option></select></div>
+    <div class="form-row"><label>Training</label>
+      <select id="cr-f-training"><option value="">—</option><option>Done</option><option>In Progress</option><option>Not Started</option><option>NA</option></select>
+    </div>
+    <div class="form-row"><label>Marketing</label>
+      <select id="cr-f-mkt"><option value="NA">NA</option><option value="published">Published</option><option value="Internal Post">Internal Post</option><option value="External Post">External Post</option><option value="on hold">On Hold</option></select>
+    </div>
+    <div class="form-row" style="display:flex;align-items:flex-end"><label>&nbsp;</label></div>
   </div>
-  <div class="section-divider">Phase Dates & Team Members</div>
-  <div id="cr-phase-rows"></div>
+
   <input type="hidden" id="cr-f-edit-id" value="">
   <div class="modal-footer">
     <button class="btn btn-outline" onclick="closeModal('add-cr')">Cancel</button>
@@ -749,7 +918,7 @@ input[type=file]{display:none}
 
 <script>
 // ═══════════════ DATA ═══════════════
-const TODAY = new Date('2025-05-07');
+const TODAY = new Date();
 const CR_CATS = {CSI:'Continuous Service Improvement',OPS:'Operational',STR:'Strategic',PRE:'Process Re-Engineering',DIG:'Digital Transformation'};
 const CR_CAT_COLORS = {CSI:'#782D55',OPS:'#8B556A',STR:'#5C243F',PRE:'#A29475',DIG:'#E0AC92'};
 const PHASE_NAMES = ['BA (CSI)','Dev (TT)','QA','UAT (QA)','Deploy (TT)'];
@@ -765,40 +934,93 @@ let sectorProjects = [
   {id:6,name:'Logistics Analytics',category:'Data',start:'2024-04-01',end:'2025-03-31',progress:100,status:'Completed',lead:'Noor Al-Rashidi',partner:'',milestones:[],desc:'Real-time logistics KPI analytics dashboard.'},
 ];
 
-// Generate 44 CRs with realistic data
-let crProjects = [];
-const crNames = ['Invoice Processing Update','Manifest Validation Enhancement','Duty Calculation Fix','Portal Login Flow','Declaration Amendment','Tariff Code Update','Document Upload Module','Clearance Tracking','Refund Module','API Gateway Integration','Report Generation Engine','Workflow Approval Chain','Audit Trail Enhancement','User Role Management','Alert Notification System','Batch Processing Update','E-Payment Gateway','Risk Assessment Engine','Cargo Tracking Module','Customs Bond System','Release Management','Tax Exemption Module','Import License Validation','Transit Declaration Form','Certificate of Origin Validation','Broker Portal Integration','HS Code Lookup Enhancement','Penalty Management System','Guarantee Management','Trade Facilitation Module','Smart Inspection Routing','Vehicle Entry System','Container Tracking','Prohibited Goods Module','Duty Relief Process','Entry Summary Report','Exit Summary Report','Statistical Reporting Tool','Post Clearance Audit','Knowledge Base Module','E-Signature Integration','Mobile App Phase 2','System Backup Enhancement','Dashboard Analytics V2'];
-const crCatList = ['CSI','OPS','STR','PRE','DIG','CSI','OPS','STR','PRE','DIG','CSI','OPS','STR','PRE','DIG','CSI','OPS','STR','PRE','DIG','CSI','OPS','STR','PRE','DIG','CSI','OPS','STR','PRE','DIG','CSI','OPS','STR','PRE','DIG','CSI','OPS','STR','PRE','DIG','CSI','OPS','STR','DIG'];
-const complexList = ['High','Medium','Low','Medium','High','Low','Medium','High','Low','Medium','High','Medium','Low','High','Medium','Low','Medium','High','Low','Medium','High','Medium','Low','High','Medium','Low','Medium','High','Low','Medium','High','Medium','Low','High','Medium','Low','Medium','High','Low','Medium','High','Medium','High','Low'];
-
-for(let i=0;i<44;i++){
-  const yr = i<14?'2024':i<30?'2025':'2026';
-  const ph = Math.min(5,1+Math.floor(i/9));
-  const phStats = [1,2,3,4,5].map((p,idx)=> idx<ph-1?'Done':idx===ph-1?'In Progress':'Pending');
-  const baseDate = new Date(`${yr}-01-01`);
-  const phases = [1,2,3,4,5].map((p,idx)=>{
-    const startDate = new Date(baseDate);
-    startDate.setMonth(startDate.getMonth()+idx*2);
-    const expEnd = new Date(startDate); expEnd.setMonth(expEnd.getMonth()+2);
-    const actualEnd = phStats[idx]==='Done'?new Date(expEnd.getTime()+(Math.random()>0.7?7*24*3600000:0)):null;
-    return {start:startDate.toISOString().slice(0,10),exp_end:expEnd.toISOString().slice(0,10),actual_end:actualEnd?actualEnd.toISOString().slice(0,10):'',status:phStats[idx],member:['Noor Al-M','Rasha T','Ahmed K','Sara M','Omar F','Dana A','Hessa R','Laith S','Faisal Q'][idx+i%9]||'TBD'};
-  });
-  const delayRisk = phStats.some((s,idx)=> s==='In Progress' && phases[idx].exp_end < TODAY.toISOString().slice(0,10));
-  crProjects.push({
-    id:`CR-${yr}-${String(i+1).padStart(3,'0')}`,
-    name:crNames[i],
-    category:crCatList[i],year:yr,
-    currentPhase:ph,
-    complexity:complexList[i],
-    phases,
-    sow:Math.random()>0.27?'Yes':'No',
-    training:Math.random()>0.4?'Yes':'No',
-    marketing:['NA','Internal Post','External Post','NA','Internal Post'][i%5],
-    progress:Math.round((ph-1)*20+Math.random()*18),
-    delayRisk,
-    status:ph===5&&phStats[4]==='Done'?'Deployed':delayRisk?'Delay Risk':'Active'
+// ── Helper: normalise any status string into Done / In Progress / Pending ──
+function normSt(s){
+  if(!s||s==='-'||s.trim()==='') return 'Pending';
+  const l=s.toLowerCase();
+  if(l==='done'||l==='approved'||l==='deployed'||l==='published') return 'Done';
+  if(l.includes('progress')||l==='testing'||l==='ready') return 'In Progress';
+  return 'Pending';
+}
+// ── Compute the 5 legacy phases from flat fields (used by charts & progress bars) ──
+function crPhases(cr){
+  return [
+    {member:cr.ba||'',exp_end:cr.brdDue||'',actual_end:'',start:'',status:normSt(cr.brdStatus)},
+    {member:cr.ttMembers||'',exp_end:cr.devDue||'',actual_end:'',start:'',status:normSt(cr.devStatus)},
+    {member:cr.qaMember||'',exp_end:cr.internalTestDue||'',actual_end:'',start:'',status:normSt(cr.internalTestStatus)},
+    {member:cr.qaMember||'',exp_end:cr.uatDue||'',actual_end:'',start:'',status:normSt(cr.uatStatus)},
+    {member:cr.ttMembers||'',exp_end:cr.deploymentDue||'',actual_end:'',start:'',status:normSt(cr.deploymentStatus)},
+  ];
+}
+function computeAllPhases(){
+  crProjects.forEach(cr=>{
+    cr.phases=crPhases(cr);
+    const done=cr.phases.filter(p=>p.status==='Done').length;
+    const inp=cr.phases.filter(p=>p.status==='In Progress').length;
+    cr.currentPhase=cr.phases.reduce((a,p,i)=>p.status==='In Progress'?i+1:p.status==='Done'?Math.max(a,i+1):a,1);
+    cr.progress=Math.round(done*20+inp*10);
+    cr.delayRisk=cr.phases.some(p=>p.status==='In Progress'&&p.exp_end&&p.exp_end<TODAY.toISOString().slice(0,10));
+    cr.status=done===5?'Deployed':cr.delayRisk?'Delay Risk':'Active';
+    // legacy compat flags
+    cr.sow=cr.crSowStatus==='Approved'?'Yes':'No';
   });
 }
+
+// ── CR data from Al-Nadeeb Internal tracker (52 CRs) ──
+let crProjects = [
+  {id:'CR240006',crNo:'CR240006',year:'2024',category:'STR',name:'GCC Customs Tariff at the 12-digit Level',nameAr:'تطبيق التعرفة الجمركية المتكاملة لدول مجلس التعاون الخليجي (12 رقم)',projectStatus:'Deployed',complexity:'High',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:220,ba:'Noor',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'NA',ddsDue:'',ttMandays:453,ttMembers:'Praveen, Naresh, Vijaya, Joji, Bhushan',devStatus:'Done',devDue:'',internalTestStatus:'Done',internalTestDue:'',qaMember:'',uatStatus:'Done',uatDue:'',training:'Done',deploymentStatus:'Done',deploymentDue:'2024-12-31',marketing:'published'},
+  {id:'CR240008',crNo:'CR240008',year:'2024',category:'OPS',name:'Minister of Finance Decision No.13 of 2023 — Missing Workflows',nameAr:'استكمال دورات عمل قرار وزير المالية رقم 13 لسنة 2023',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:30,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-01-23',ttMandays:153,ttMembers:'Bhushan G, Nilesh Reddy, Ritesh Shetty, Dhanasekaran',devStatus:'Done',devDue:'2024-11-25',internalTestStatus:'Done',internalTestDue:'2025-01-13',qaMember:'Majed',uatStatus:'Done',uatDue:'2025-01-16',training:'Done',deploymentStatus:'Done',deploymentDue:'2024-12-10',marketing:'NA'},
+  {id:'CR240010',crNo:'CR240010',year:'2024',category:'OPS',name:'Customs Chairman Executive Decisions (Cancellation)',nameAr:'القرارات التنفيذية رقم (38) لسنة 2024 (11 - إلغاء البيانات)',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:20,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-01-30',ttMandays:85,ttMembers:'Bhushan G, Soundarrajan, Kumara Swami, Sai Kumar',devStatus:'Done',devDue:'2024-12-23',internalTestStatus:'Done',internalTestDue:'2025-01-11',qaMember:'Ragep',uatStatus:'Done',uatDue:'2025-01-13',training:'Not invited to UAT session',deploymentStatus:'Done',deploymentDue:'2025-01-08',marketing:'content ready for approval'},
+  {id:'CR240002',crNo:'CR240002',year:'2024',category:'OPS',name:'Customs Chairman Executive Decisions (3 - Samples Exemption)',nameAr:'القرارات التنفيذية رقم (38) لسنة 2024 (3 - العينات التجارية)',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:32,ba:'Noor',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-02-06',ttMandays:160,ttMembers:'Nilesh Reddy, Rajesh Shetty, Ritesh Shetty, Aravinda',devStatus:'Done',devDue:'2024-12-03',internalTestStatus:'Done',internalTestDue:'2025-01-14',qaMember:'Rani',uatStatus:'Done',uatDue:'2025-01-16',training:'Done',deploymentStatus:'Done',deploymentDue:'2025-01-08',marketing:'published'},
+  {id:'CR240005',crNo:'CR240005',year:'2024',category:'OPS',name:'Amend Clearing Agency Port',nameAr:'تعديل منافذ وكالة التخليص الجمركي',projectStatus:'Deployed',complexity:'Low',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:33,ba:'Noor',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'',ttMandays:40,ttMembers:'Vijaya',devStatus:'Done',devDue:'2025-02-25',internalTestStatus:'Done',internalTestDue:'',qaMember:'',uatStatus:'Done',uatDue:'',training:'Done',deploymentStatus:'Done',deploymentDue:'2025-04-14',marketing:'published'},
+  {id:'CR240011',crNo:'CR240011',year:'2024',category:'CSI',name:'E-Declaration Enhancements (Phase 1)',nameAr:'تحسينات الاقرار الجمركي (المرحلة 1)',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:'',ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'NA',ddsDue:'2025-02-06',ttMandays:100,ttMembers:'Vijaya',devStatus:'Done',devDue:'2025-04-15',internalTestStatus:'Done',internalTestDue:'',qaMember:'',uatStatus:'Done',uatDue:'',training:'Done',deploymentStatus:'Done',deploymentDue:'2024-12-15',marketing:'published'},
+  {id:'CR240007',crNo:'CR240007',year:'2024',category:'OPS',name:'Loss of Goods — Duty Calculation Enhancements (Phase 1)',nameAr:'تحسينات إجراءات الفقدان (المرحلة الأولى)',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:40,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-06-15',ttMandays:132,ttMembers:'Bhushan, Nilesh, Dhanasekaran, SaiKumar',devStatus:'Done',devDue:'2024-11-17',internalTestStatus:'Done',internalTestDue:'',qaMember:'Rani',uatStatus:'Done',uatDue:'',training:'Done',deploymentStatus:'Done',deploymentDue:'2024-12-22',marketing:'NA'},
+  {id:'CR240004',crNo:'CR240004',year:'2024',category:'OPS',name:'Abandonment — Goods Waving Enhancements (Phase 1)',nameAr:'تحسينات إجراءات التنازل (المرحلة الأولى)',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:40,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-06-15',ttMandays:175,ttMembers:'Aravinda, Rajesh, Ritesh, Kumaraswamy',devStatus:'Done',devDue:'2024-10-30',internalTestStatus:'Done',internalTestDue:'',qaMember:'Rani',uatStatus:'Done',uatDue:'',training:'Done',deploymentStatus:'Done',deploymentDue:'2024-12-11',marketing:'NA'},
+  {id:'CR240009',crNo:'CR240009',year:'2024',category:'STR',name:'eTIR Module',nameAr:'الربط مع نظام الاتحاد الدولي للنقل البري TIR',projectStatus:'Deployed',complexity:'High',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:31,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'In Progress',ddsStatus:'Done',ddsDue:'2025-02-13',ttMandays:206,ttMembers:'Bhushan G, Nilesh Reddy, Ritesh Shetty, Dhanasekaran, Soundarrajan, Kumara Swami, Sai Kumar',devStatus:'Done',devDue:'2025-03-15',internalTestStatus:'Done',internalTestDue:'2025-05-15',qaMember:'Majed',uatStatus:'Done',uatDue:'',training:'Done',deploymentStatus:'Done',deploymentDue:'2025-05-26',marketing:'published'},
+  {id:'CR250007',crNo:'CR250007',year:'2025',category:'DIG',name:'Al-Nadeeb GCC QR Code',nameAr:'تطبيق خاصية الQR CODE في البيان الجمركي',projectStatus:'Deployed',complexity:'Low',crSowStatus:'Approved',brdDue:'2025-01-03',brdStatus:'Done',baMandays:18,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-06-15',ttMandays:30,ttMembers:'Vijaya, Praveen',devStatus:'Done',devDue:'2025-03-31',internalTestStatus:'Done',internalTestDue:'',qaMember:'Ragep',uatStatus:'Done',uatDue:'',training:'Not invited to UAT session',deploymentStatus:'Done',deploymentDue:'2025-05-18',marketing:'published on internal website'},
+  {id:'CR250004',crNo:'CR250004',year:'2025',category:'OPS',name:'Courier Declaration in Abu-Samra',nameAr:'وحدة البريد السريع في ابوسمرة',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-02-13',brdStatus:'Done',baMandays:40,ba:'Noor, AbdulRahman',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-06-15',ttMandays:120,ttMembers:'Praveen',devStatus:'Done',devDue:'2025-05-19',internalTestStatus:'Done',internalTestDue:'2025-06-12',qaMember:'Ragep',uatStatus:'Done',uatDue:'2025-06-15',training:'Done',deploymentStatus:'Done',deploymentDue:'2025-06-22',marketing:'on hold'},
+  {id:'CR240011-P2',crNo:'CR240011',year:'2024',category:'CSI',name:'E-Declaration Enhancements (Phase 2)',nameAr:'تحسينات الاقرار الجمركي (المرحلة 2)',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'',brdStatus:'Done',baMandays:35,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-06-15',ttMandays:100,ttMembers:'Vijaya',devStatus:'Done',devDue:'2025-04-06',internalTestStatus:'Done',internalTestDue:'',qaMember:'Rani',uatStatus:'Done',uatDue:'',training:'Done',deploymentStatus:'Done',deploymentDue:'2025-06-01',marketing:'published'},
+  {id:'CR250005',crNo:'CR250005',year:'2025',category:'PRE',name:'Exemptions Module Revamp',nameAr:'إعادة هندسة وحدة الإعفاءات',projectStatus:'Deployed',complexity:'Low',crSowStatus:'Approved',brdDue:'2025-02-13',brdStatus:'Done',baMandays:28,ba:'Noor, Menna',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-06-15',ttMandays:130,ttMembers:'Aravinda, Rajesh, Ritesh, Kumaraswamy, SaiKumar',devStatus:'Done',devDue:'2025-05-05',internalTestStatus:'Done',internalTestDue:'2025-06-16',qaMember:'Majed, Rani',uatStatus:'Done',uatDue:'2025-06-22',training:'Done',deploymentStatus:'Done',deploymentDue:'2025-06-29',marketing:'published'},
+  {id:'CR250010',crNo:'CR250010',year:'2025',category:'OPS',name:'Executive Decision Number 5',nameAr:'قرارات الرئيس التنفيذي 5 (إعفاءات رسوم نقص مستندات)',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-04-15',brdStatus:'Done',baMandays:35,ba:'Noor, Menna',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-06-15',ttMandays:70,ttMembers:'Nilesh Reddy, Ritesh Shetty, Dhanasekaran, Soundarrajan',devStatus:'Done',devDue:'2025-06-11',internalTestStatus:'Done',internalTestDue:'2025-06-19',qaMember:'Majed, Ragep',uatStatus:'Done',uatDue:'2025-06-22',training:'Done',deploymentStatus:'Done',deploymentDue:'2025-06-29',marketing:'published'},
+  {id:'CR250003',crNo:'CR250003',year:'2025',category:'DIG',name:'POS Integration',nameAr:'التكامل مع أجهزة نقاط البيع (POS)',projectStatus:'Deployed',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-01-30',brdStatus:'Done',baMandays:27,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'',ttMandays:83.95,ttMembers:'Wael, Vijaya',devStatus:'Done',devDue:'2025-02-15',internalTestStatus:'Done',internalTestDue:'2025-02-17',qaMember:'Rani',uatStatus:'Done',uatDue:'2025-02-20',training:'Done',deploymentStatus:'Done',deploymentDue:'2025-07-13',marketing:''},
+  {id:'CR250017',crNo:'CR250017',year:'2025',category:'STR',name:'Integration with QC for Turkey Agreement',nameAr:'الاتفاقية التفضيلية بين دولة قطر وجمهورية تركيا',projectStatus:'Deployed',complexity:'Low',crSowStatus:'Approved',brdDue:'2025-06-19',brdStatus:'Done',baMandays:45,ba:'Khalid',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Not Started',ddsDue:'',ttMandays:21.33,ttMembers:'Joji, Teja',devStatus:'Done',devDue:'2025-07-15',internalTestStatus:'Done',internalTestDue:'2025-07-27',qaMember:'Majed',uatStatus:'Done',uatDue:'2025-07-31',training:'N/A',deploymentStatus:'Done',deploymentDue:'2025-08-10',marketing:'on hold'},
+  {id:'CR230014',crNo:'CR230014',year:'2023',category:'STR',name:'Data Exchange with SAB (Audit Bureau)',nameAr:'تكامل بيانات نظام النديب وديوان المحاسبة',projectStatus:'Ready for Deployment',complexity:'Medium',crSowStatus:'Approved',brdDue:'2023-09-30',brdStatus:'Done',baMandays:10,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'',ttMandays:22.5,ttMembers:'Sachin',devStatus:'Done',devDue:'2025-06-30',internalTestStatus:'Done',internalTestDue:'',qaMember:'Majed',uatStatus:'On Hold',uatDue:'2025-07-17',training:'',deploymentStatus:'pending',deploymentDue:'',marketing:'NA'},
+  {id:'CR250018',crNo:'CR250018',year:'2025',category:'DIG',name:'Integration with QNB HDPS (Hitachi Digital Payment Solution)',nameAr:'التكامل مع بوابة الدفع (QNB Payment Gateway)',projectStatus:'Testing',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-06-15',brdStatus:'Done',baMandays:45,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'',ttMandays:174.14,ttMembers:'Praveen',devStatus:'Done',devDue:'2025-06-30',internalTestStatus:'Done',internalTestDue:'',qaMember:'Rani, Nagham',uatStatus:'On Hold',uatDue:'2025-07-27',training:'',deploymentStatus:'',deploymentDue:'2025-07-30',marketing:'In Progress'},
+  {id:'CR250008',crNo:'CR250008',year:'2025',category:'DIG',name:'Hssify — AI-powered HS Code Classification',nameAr:'أداة تصنيف الرموز والقيد بالذكاء الإصطناعي (Hssify)',projectStatus:'Development',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-04-05',brdStatus:'Done',baMandays:46,ba:'Noor',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'NA',ddsDue:'2025-06-15',ttMandays:40,ttMembers:'Vijaya',devStatus:'In Progress',devDue:'2025-07-31',internalTestStatus:'Done',internalTestDue:'',qaMember:'Majed',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:'In Progress'},
+  {id:'CR250009',crNo:'CR250009',year:'2025',category:'DIG',name:'AI Assistant — Virtual Assistant',nameAr:'المساعد الافتراضي',projectStatus:'Development',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-08-07',brdStatus:'Done',baMandays:125,ba:'Menna',brdInternalReview:'In Progress',brdGacApproval:'Approved',ddsStatus:'NA',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'In Progress',devDue:'2025-08-31',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:'In Progress'},
+  {id:'CR250023',crNo:'CR250023',year:'2025',category:'CSI',name:'Events Management System (Phase II)',nameAr:'موائمة نظام إدارة الفعاليات',projectStatus:'Development',complexity:'Medium',crSowStatus:'Pending Signature',brdDue:'2025-07-16',brdStatus:'Done',baMandays:42,ba:'Noor',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'In Progress',ddsDue:'2025-10-10',ttMandays:'',ttMembers:'',devStatus:'In Progress',devDue:'2025-09-10',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:'In Progress'},
+  {id:'CR250014',crNo:'CR250014',year:'2025',category:'OPS',name:'Anti-Dumping Unit',nameAr:'ضوابط وحدة الإغراق',projectStatus:'Development',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-06-04',brdStatus:'Done',baMandays:55,ba:'Menna',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'In Progress',ddsDue:'2025-08-25',ttMandays:175.68,ttMembers:'Vijaya, Praveen, Joji, Sachin, Teja',devStatus:'In Progress',devDue:'2025-08-10',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'2025-10-15',marketing:''},
+  {id:'CR250011',crNo:'CR250011',year:'2025',category:'OPS',name:'Immediate Clearance (Military PAC Declarations)',nameAr:'التصفية الفورية لمعدات القوات الصديقة والهيئات الخاصة',projectStatus:'Development',complexity:'Low',crSowStatus:'Approved',brdDue:'2025-04-15',brdStatus:'Done',baMandays:45,ba:'Ali',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'In Progress',ddsDue:'2025-09-15',ttMandays:132.74,ttMembers:'Vijaya, Praveen',devStatus:'On Hold',devDue:'2025-08-15',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'2025-09-15',marketing:'NA'},
+  {id:'CR250001',crNo:'CR250001',year:'2025',category:'STR',name:'QatarPass',nameAr:'ترقية نظام التوثيق الوطني (QatarPass)',projectStatus:'On Hold',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-01-29',brdStatus:'Done',baMandays:25,ba:'Ali, AbdulRahman',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Done',ddsDue:'2025-06-15',ttMandays:60,ttMembers:'Bhushan, Rajesh, Ritesh, Kumaraswamy',devStatus:'Done',devDue:'2025-03-31',internalTestStatus:'Done',internalTestDue:'',qaMember:'Majed',uatStatus:'On Hold',uatDue:'',training:'',deploymentStatus:'pending',deploymentDue:'',marketing:'on hold'},
+  {id:'CR2500013',crNo:'CR2500013',year:'2025',category:'OPS',name:'Land Pre-arrival Declaration Submission (Military PAC)',nameAr:'التقديم المسبق للبيانات البرية',projectStatus:'Development Queued',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-05-04',brdStatus:'Done',baMandays:50,ba:'Noor, Khalid',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Not Started',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'2025-11-06',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'2025-11-15',marketing:''},
+  {id:'CR250012',crNo:'CR250012',year:'2025',category:'STR',name:'MOPH Integration Enhancements',nameAr:'تحسين التكامل مع وزارة الصحة',projectStatus:'Development Queued',complexity:'High',crSowStatus:'Approved',brdDue:'2025-06-03',brdStatus:'Done',baMandays:120,ba:'Ali, Abdelrahman',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Not Started',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'2025-12-03',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'2025-12-25',marketing:''},
+  {id:'CR250015',crNo:'CR250015',year:'2025',category:'OPS',name:'X-Ray Integration in Abu-Samra Port',nameAr:'الربط مع أجهزة الأشعة في منفذ بوسمرة',projectStatus:'Development Queued',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-06-03',brdStatus:'Done',baMandays:30,ba:'Ali, Khalid',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Not Started',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'2025-09-28',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'2025-10-31',marketing:''},
+  {id:'CR250016',crNo:'CR250016',year:'2025',category:'OPS',name:'X-Ray Enhancements in Hamad Port',nameAr:'الربط مع أجهزة الأشعة في ميناء حمد (المرحلة ٢)',projectStatus:'Development Queued',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-06-03',brdStatus:'Done',baMandays:45,ba:'Ali, Khalid',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Not Started',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'2025-10-02',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'2025-10-15',marketing:''},
+  {id:'CR250019',crNo:'CR250019',year:'2025',category:'STR',name:'Integration with Digital Factory',nameAr:'التكامل مع المصنع الرقمي - خدمة امتلاك صقور',projectStatus:'Development Queued',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-07-22',brdStatus:'Done',baMandays:54,ba:'Noor',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Not Started',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'2025-12-31',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR250020',crNo:'CR250020',year:'2025',category:'OPS',name:'Hamad Port System Messages',nameAr:'تحسين التكامل مع أنظمة ميناء حمد',projectStatus:'Development Queued',complexity:'Low',crSowStatus:'Approved',brdDue:'2025-06-26',brdStatus:'Done',baMandays:52,ba:'Abdelrahman',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Not Started',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'2025-08-31',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'2025-12-31',marketing:''},
+  {id:'CR250021',crNo:'CR250021',year:'2025',category:'STR',name:'MECC Integration',nameAr:'التكامل مع وزارة البيئة والتغير المناخي',projectStatus:'Development Queued',complexity:'Medium',crSowStatus:'Approved',brdDue:'2025-07-15',brdStatus:'Done',baMandays:30,ba:'Khalid',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'Not Started',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'2025-11-06',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR250027',crNo:'CR250027',year:'2025',category:'STR',name:'Integration with MoPH for Prior Notification of Food Shipments',nameAr:'التكامل مع وزارة الصحة لإخطار الشحنات الغذائية المسبقة',projectStatus:'Development Queued',complexity:'Low',crSowStatus:'Pending Signature',brdDue:'2025-07-31',brdStatus:'Done',baMandays:20,ba:'Abdelrahman',brdInternalReview:'Done',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-001',crNo:'',year:'2025',category:'CSI',name:'Valuation Enhancements',nameAr:'تحسينات التقييم',projectStatus:'Development Queued',complexity:'Medium',crSowStatus:'N/A',brdDue:'2025-07-31',brdStatus:'',baMandays:'',ba:'Menna',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-002',crNo:'',year:'2025',category:'DIG',name:'HS Code Inquiry Self-Service',nameAr:'خدمة التحديد المسبق للرمز المنسق',projectStatus:'Analysis',complexity:'Low',crSowStatus:'In Progress',brdDue:'2025-08-15',brdStatus:'In Progress',baMandays:'',ba:'Menna',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-003',crNo:'',year:'2025',category:'DIG',name:"Trader's Imports Report Self-Service",nameAr:'خدمة طلب إحصائية للبضائع المستوردة لفترة محددة',projectStatus:'Analysis',complexity:'Low',crSowStatus:'In Progress',brdDue:'2025-08-28',brdStatus:'In Progress',baMandays:'',ba:'Menna',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR250028',crNo:'CR250028',year:'2025',category:'STR',name:'Enhancement on Declaration XML to Support MOPH Integration',nameAr:'تحسين على نموذج البيانات الجمركية لتمكين التكامل مع وزارة الصحة العامة',projectStatus:'Development Queued',complexity:'Low',crSowStatus:'Pending Signature',brdDue:'2025-08-07',brdStatus:'Done',baMandays:25,ba:'Abdelrahman',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR230011',crNo:'CR230011',year:'2023',category:'PRE',name:'Customs Warehouse Re-engineering (Phase 1)',nameAr:'إعادة هيكلة وحدة المستودعات (المرحلة1)',projectStatus:'Development',complexity:'High',crSowStatus:'Approved',brdDue:'2023-08-30',brdStatus:'Done',baMandays:150,ba:'Noor',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'NA',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'2025-12-31',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'2025-12-31',marketing:''},
+  {id:'CR240001',crNo:'CR240001',year:'2024',category:'PRE',name:'Law & Enforcement Unit Re-Engineering (Phase 2)',nameAr:'إعادة هندسة وحدة تنفيذ القانون',projectStatus:'Development',complexity:'High',crSowStatus:'Approved',brdDue:'2024-12-16',brdStatus:'Done',baMandays:204,ba:'Noor',brdInternalReview:'Done',brdGacApproval:'Approved',ddsStatus:'NA',ddsDue:'',ttMandays:1231,ttMembers:'Bhushan G, Nilesh Reddy, Ritesh Shetty, Dhanasekaran, Soundarrajan, Kumara Swami, Sai Kumar',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-004',crNo:'',year:'2025',category:'STR',name:'KSA Trial Integration',nameAr:'التفعيل التجريبي لمخرجات مشاريع الإتحاد الجمركي',projectStatus:'Analysis',complexity:'High',crSowStatus:'In Progress',brdDue:'2025-07-03',brdStatus:'In Progress',baMandays:'',ba:'Ali',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-005',crNo:'',year:'2025',category:'OPS',name:'X-Ray Integration for Private Vehicles',nameAr:'التكامل مع أجهزة فحص السيارات السياحية في منفذ أبو سمرة',projectStatus:'Analysis',complexity:'Medium',crSowStatus:'In Progress',brdDue:'2025-08-31',brdStatus:'In Progress',baMandays:'',ba:'Khalid',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-006',crNo:'',year:'2025',category:'CSI',name:'Declaration Cancellation Statuses',nameAr:'حالات إلغاء البيان',projectStatus:'Analysis',complexity:'Medium',crSowStatus:'In Progress',brdDue:'2025-09-15',brdStatus:'In Progress',baMandays:'',ba:'Noor, Menna',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-007',crNo:'',year:'2025',category:'OPS',name:'QPost Transshipment',nameAr:'المسافنة لبريد قطر',projectStatus:'Analysis',complexity:'Medium',crSowStatus:'In Progress',brdDue:'2025-09-15',brdStatus:'In Progress',baMandays:'',ba:'Khalid',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-008',crNo:'',year:'2025',category:'OPS',name:'ATA Carnet Self Service Project',nameAr:'مشروع الخدمة الذاتية لدفتر الإدخال المؤقت ATA',projectStatus:'In Pipeline',complexity:'Medium',crSowStatus:'Not started',brdDue:'2025-09-15',brdStatus:'',baMandays:'',ba:'Menna',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-009',crNo:'',year:'2025',category:'OPS',name:'Military Declaration',nameAr:'البيان العسكري',projectStatus:'In Pipeline',complexity:'Medium',crSowStatus:'Not started',brdDue:'2025-09-15',brdStatus:'',baMandays:'',ba:'Ali',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-010',crNo:'',year:'2025',category:'PRE',name:'Courier Unit Revamp',nameAr:'وحدة البريد السريع',projectStatus:'In Pipeline',complexity:'High',crSowStatus:'Not started',brdDue:'2025-10-15',brdStatus:'',baMandays:'',ba:'Noor',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-011',crNo:'',year:'2025',category:'OPS',name:'Transshipment',nameAr:'المسافنة',projectStatus:'Analysis',complexity:'Medium',crSowStatus:'In Progress',brdDue:'2025-10-15',brdStatus:'In Progress',baMandays:'',ba:'Ali, Abdelrahman',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-012',crNo:'',year:'2025',category:'DIG',name:'Passenger Cargo Self-Service Project',nameAr:'مشروع الخدمة الذاتية لنقل الركاب والبضائع',projectStatus:'Analysis',complexity:'Medium',crSowStatus:'In Progress',brdDue:'2025-10-20',brdStatus:'In Progress',baMandays:'',ba:'Menna',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-013',crNo:'',year:'2025',category:'DIG',name:'QNB Payment Gateway (Refund)',nameAr:'بوابة الدفع (الإسترداد)',projectStatus:'In Pipeline',complexity:'Medium',crSowStatus:'Not started',brdDue:'2025-11-10',brdStatus:'',baMandays:'',ba:'Ali',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-014',crNo:'',year:'2025',category:'STR',name:'SAS Risk Engine Integration (Phase 2)',nameAr:'التكامل مع نظام إدارة المخاطر (المرحلة 2)',projectStatus:'In Pipeline',complexity:'Low',crSowStatus:'Not started',brdDue:'2025-12-16',brdStatus:'',baMandays:'',ba:'Ali',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-015',crNo:'',year:'2025',category:'OPS',name:'Personal Import',nameAr:'الاستيراد الشخصي الذاتي',projectStatus:'On Hold',complexity:'Medium',crSowStatus:'Not started',brdDue:'2025-12-24',brdStatus:'',baMandays:'',ba:'Ali',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-016',crNo:'',year:'2025',category:'STR',name:'GTA Integration (Phase 2)',nameAr:'التكامل مع الهيئة العامة للضرائب (المرحلة 2)',projectStatus:'In Pipeline',complexity:'High',crSowStatus:'Not started',brdDue:'2025-12-31',brdStatus:'',baMandays:'',ba:'Ali',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+  {id:'CR-TBD-017',crNo:'',year:'2025',category:'OPS',name:'Tax Warehouses',nameAr:'المستودعات الضريبية',projectStatus:'In Pipeline',complexity:'High',crSowStatus:'Not started',brdDue:'2025-12-31',brdStatus:'',baMandays:'',ba:'Noor',brdInternalReview:'',brdGacApproval:'',ddsStatus:'',ddsDue:'',ttMandays:'',ttMembers:'',devStatus:'',devDue:'',internalTestStatus:'',internalTestDue:'',qaMember:'',uatStatus:'',uatDue:'',training:'',deploymentStatus:'',deploymentDue:'',marketing:''},
+];
 
 let notes = [
   {type:'risk',proj:'Financial Hub',desc:'Integration with legacy ERP not completed. Blocking UAT start.',by:'Sara Al-Mansoori',date:'2025-04-28'},
@@ -806,6 +1028,47 @@ let notes = [
   {type:'approval',proj:'CUA Platform',desc:'Budget extension request pending Finance approval.',by:'Ahmed Al-Dosari',date:'2025-05-05'},
   {type:'info',proj:'Data Quality Framework',desc:'Pilot successfully completed. Moving to full rollout planning.',by:'Mariam Hassan',date:'2025-04-20'},
 ];
+
+// ═══════════════ PERSISTENCE (localStorage) ═══════════════
+const LS = {crs:'cl_alnadeeb_crs_v2',proj:'cl_alnadeeb_proj_v1',notes:'cl_alnadeeb_notes_v1',ts:'cl_alnadeeb_ts_v1'};
+
+function saveData(){
+  try{
+    localStorage.setItem(LS.crs,JSON.stringify(crProjects));
+    localStorage.setItem(LS.proj,JSON.stringify(sectorProjects));
+    localStorage.setItem(LS.notes,JSON.stringify(notes));
+    const ts=new Date().toISOString();
+    localStorage.setItem(LS.ts,ts);
+    showSaveBadge('saved','Saved '+ts.slice(11,16)+' UTC');
+  }catch(e){showSaveBadge('unsaved','Save failed — storage full?');}
+}
+
+function loadData(){
+  try{
+    const sc=localStorage.getItem(LS.crs);
+    if(sc) crProjects=JSON.parse(sc);
+    const sp=localStorage.getItem(LS.proj);
+    if(sp) sectorProjects=JSON.parse(sp);
+    const sn=localStorage.getItem(LS.notes);
+    if(sn) notes=JSON.parse(sn);
+    const ts=localStorage.getItem(LS.ts);
+    if(ts) showSaveBadge('saved','Last saved '+ts.slice(0,10)+' '+ts.slice(11,16));
+  }catch(e){console.warn('loadData error',e);}
+  computeAllPhases();
+}
+
+function clearAllData(){
+  if(!confirm('Reset to demo data? All edits in browser storage will be lost.')) return;
+  Object.values(LS).forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+
+function showSaveBadge(cls,msg){
+  const b=document.getElementById('save-badge');
+  if(!b) return;
+  b.textContent=(cls==='saved'?'✓ ':'⚠ ')+msg;
+  b.className='save-badge '+cls;
+}
 
 let crCatFilter='all',crYearFilter='all';
 let allocTab='csi';
@@ -817,9 +1080,9 @@ function showPage(id,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if(el) el.classList.add('active');
-  const titles={overview:'Sector Overview','cr-overview':'CR Dashboard (Alnadeeb)','cr-list':'CR Project List','cr-cards':'CR Cards',projects:'IT Sector Projects',timeline:'Project Timeline / Gantt',risks:'Risks, Issues & Notes',allocation:'Team Allocation',import:'Import / Export Data'};
+  const titles={overview:'Sector Overview','cr-overview':'CR Dashboard (Alnadeeb)','cr-list':'CR Project List','cr-cards':'CR Cards',projects:'IT Sector Projects',timeline:'Project Timeline / Gantt',risks:'Risks, Issues & Notes',allocation:'Team Allocation','data-manager':'CR Data Manager',import:'Import / Export Data'};
   document.getElementById('page-title').textContent=titles[id]||id;
-  const renderers={overview:renderOverview,projects:renderProjects,timeline:renderTimeline,risks:renderNotes,'cr-overview':renderCROverview,'cr-list':renderCRListTable,'cr-cards':renderCRList,allocation:renderAllocation};
+  const renderers={overview:renderOverview,projects:renderProjects,timeline:renderTimeline,risks:renderNotes,'cr-overview':renderCROverview,'cr-list':renderCRListTable,'cr-cards':renderCRList,allocation:renderAllocation,'data-manager':renderDataManager};
   if(renderers[id]) renderers[id]();
 }
 
@@ -840,6 +1103,7 @@ function renderOverview(){
   document.getElementById('ov-risk').textContent=sectorProjects.filter(p=>p.status==='At Risk'||p.status==='Delayed').length;
   const avgProg=crs.length?Math.round(crs.reduce((a,c)=>a+c.progress,0)/crs.length):0;
   document.getElementById('ov-cr-prog').textContent=avgProg+'%';
+  const subEl=document.getElementById('ov-cr-sub');if(subEl) subEl.textContent='Avg across all '+crs.length+' CRs';
   document.getElementById('ov-delay-cr').textContent=crs.filter(c=>c.delayRisk).length;
 
   // Upcoming IT milestones
@@ -1292,22 +1556,60 @@ function renderCRList(){
     const mktCls = cr.marketing==='NA'?'cf-mkt-na':cr.marketing==='Internal Post'?'cf-mkt-int':'cf-mkt-ext';
     const mktTxt = cr.marketing==='NA'?'Mkt: N/A':cr.marketing==='Internal Post'?'Mkt: Internal':'Mkt: External';
 
-    // Expanded detail rows: each phase date card
-    const phaseDetailHtml = cr.phases.map((ph,i)=>{
-      const delay = ph.status==='In Progress' && ph.exp_end && ph.exp_end<TODAY.toISOString().slice(0,10);
-      const borderC = ph.status==='Done'?'#a5d6a7':ph.status==='In Progress'?PHASE_COLORS[i]:'#e0d8cf';
-      const bgC = ph.status==='Done'?'#f1fff3':ph.status==='In Progress'?`${PHASE_COLORS[i]}10`:'#fafafa';
-      return `<div style="border-radius:7px;border:1.5px solid ${borderC};background:${bgC};padding:7px 9px;${delay?'outline:2px solid var(--risk);outline-offset:1px':''}">
-        <div style="font-size:9px;font-weight:800;color:${PHASE_COLORS[i]};margin-bottom:3px">${PH_SHORT[i]} — ${PH_TEAM[i]}</div>
-        <div style="font-size:8px;color:var(--muted);line-height:1.6">
-          ${ph.member?`<div>👤 ${ph.member}</div>`:''}
-          ${ph.start?`<div>▷ Start: ${ph.start}</div>`:''}
-          ${ph.exp_end?`<div>⊙ Due: <strong style="color:${delay?'var(--risk)':'inherit'}">${ph.exp_end}${delay?' ⚠':''}</strong></div>`:''}
-          ${ph.actual_end?`<div style="color:var(--ok)">✓ Done: ${ph.actual_end}</div>`:''}
-          <div style="font-weight:700;color:${ph.status==='Done'?'var(--ok)':ph.status==='In Progress'?PHASE_COLORS[i]:'var(--muted)'};margin-top:2px">${ph.status}</div>
+    // Expanded detail: organised by team section (mirrors actual Excel columns)
+    const fv=(v,cls)=>{
+      if(!v||v==='-') return `<span class="tsf-val empty">—</span>`;
+      const l=(v+'').toLowerCase();
+      const vc=l==='done'||l==='approved'||l==='published'?'done':l.includes('progress')||l==='testing'?'ip':l.includes('hold')?'hold':'';
+      return `<span class="tsf-val ${vc}">${v}</span>`;
+    };
+    const tf=(label,val)=>`<div class="tsf"><span class="tsf-label">${label}</span>${fv(val)}</div>`;
+    const phaseDetailHtml=`
+      <div class="team-sec">
+        <div class="team-sec-hdr hdr-csi">CSI Team — Business Analysis</div>
+        <div class="team-sec-body four-col">
+          ${tf('CR/SOW Status',cr.crSowStatus)}
+          ${tf('BRD Due',cr.brdDue)}
+          ${tf('BRD Status',cr.brdStatus)}
+          ${tf('BA Mandays',cr.baMandays)}
+          ${tf('BA',cr.ba)}
+          ${tf('BRD Internal Review',cr.brdInternalReview)}
+          ${tf('BRD GAC Approval',cr.brdGacApproval)}
         </div>
+      </div>
+      <div class="team-sec">
+        <div class="team-sec-hdr hdr-tt">TT Team — Development & Deployment</div>
+        <div class="team-sec-body four-col">
+          ${tf('DDS Status',cr.ddsStatus)}
+          ${tf('DDS Due',cr.ddsDue)}
+          ${tf('TT Mandays',cr.ttMandays)}
+          ${tf('TT Members',cr.ttMembers)}
+          ${tf('Dev. Status',cr.devStatus)}
+          ${tf('Dev. Due',cr.devDue)}
+          ${tf('Deploy Status',cr.deploymentStatus)}
+          ${tf('Deploy Due',cr.deploymentDue)}
+        </div>
+      </div>
+      <div class="team-sec">
+        <div class="team-sec-hdr hdr-qa">QA Team — Testing & UAT</div>
+        <div class="team-sec-body four-col">
+          ${tf('Internal Test Status',cr.internalTestStatus)}
+          ${tf('Internal Test Due',cr.internalTestDue)}
+          ${tf('QA Member',cr.qaMember)}
+          ${tf('UAT Status',cr.uatStatus)}
+          ${tf('UAT Due',cr.uatDue)}
+        </div>
+      </div>
+      <div class="team-sec">
+        <div class="team-sec-hdr hdr-final">Training & Marketing</div>
+        <div class="team-sec-body two-col">
+          ${tf('Training',cr.training)}
+          ${tf('Marketing',cr.marketing)}
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;padding:4px 0">
+        <button class="btn btn-outline" style="font-size:10px;padding:4px 10px" onclick="editCR('${cr.id.replace(/'/g,"\\'")}')">✎ Edit this CR</button>
       </div>`;
-    }).join('');
 
     const catColor = CR_CAT_COLORS[cr.category]||'#868686';
     const complexBadge = cr.complexity==='High'?`<span style="background:#ffebee;color:var(--risk);font-size:7px;font-weight:700;padding:1px 5px;border-radius:5px">HIGH</span>`:cr.complexity==='Low'?`<span style="background:#e8f5e9;color:#1b5e20;font-size:7px;font-weight:700;padding:1px 5px;border-radius:5px">LOW</span>`:'';
@@ -1352,15 +1654,13 @@ function renderCRList(){
 
       <!-- Expand button -->
       <button class="cr-expand-btn" id="expbtn-${cr.id.replace(/[^a-zA-Z0-9]/g,'_')}" onclick="toggleCRCard('${cr.id.replace(/[^a-zA-Z0-9]/g,'_')}')">
-        <span class="cr-expand-arrow">▼</span> Phase Details
+        <span class="cr-expand-arrow">▼</span> Full Details (all teams)
       </button>
 
       <!-- Expandable detail -->
       <div class="cr-detail-panel" id="crdet-${cr.id.replace(/[^a-zA-Z0-9]/g,'_')}">
         <div class="cr-detail-inner">
-          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
-            ${phaseDetailHtml}
-          </div>
+          ${phaseDetailHtml}
         </div>
       </div>
     </div>`;
@@ -1417,60 +1717,85 @@ function openModal(id){document.getElementById('modal-'+id).classList.add('open'
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m) m.classList.remove('open');}));
 
-// CR Phase rows in modal
-function buildCRPhaseRows(){
-  const rows=[{ph:1,team:'CSI Team',role:'BA'},{ph:2,team:'TT Team',role:'Dev'},{ph:3,team:'QA Team',role:'QA'},{ph:4,team:'QA Team',role:'UAT'},{ph:5,team:'TT Team',role:'Deploy'}];
-  let html='';
-  rows.forEach(r=>{
-    html+=`<div style="margin-bottom:10px;padding:10px;border-radius:6px;background:#fdf9f6;border-left:3px solid ${PHASE_COLORS[r.ph-1]}">
-      <div style="font-size:10px;font-weight:700;color:${PHASE_COLORS[r.ph-1]};margin-bottom:6px">Phase ${r.ph} — ${r.role} (${r.team})</div>
-      <div class="form-grid" style="gap:8px">
-        <div class="form-row" style="margin:0"><label>Team Member</label><input type="text" id="crph${r.ph}-member" placeholder="e.g. Noor Al-Mansouri"></div>
-        <div class="form-row" style="margin:0"><label>Status</label><select id="crph${r.ph}-status"><option>Pending</option><option>In Progress</option><option>Done</option></select></div>
-        <div class="form-row" style="margin:0"><label>Start Date</label><input type="date" id="crph${r.ph}-start"></div>
-        <div class="form-row" style="margin:0"><label>Expected End</label><input type="date" id="crph${r.ph}-expend"></div>
-        <div class="form-row" style="margin:0;grid-column:1/-1"><label>Actual End (if done)</label><input type="date" id="crph${r.ph}-actualend"></div>
-      </div>
-    </div>`;
-  });
-  document.getElementById('cr-phase-rows').innerHTML=html;
-}
-
 function openAddCRModal(){
   document.getElementById('modal-cr-title').textContent='Add CR Project';
   document.getElementById('cr-f-edit-id').value='';
-  buildCRPhaseRows();
+  // Clear all fields
+  ['cr-f-crno','cr-f-name','cr-f-namear','cr-f-ba','cr-f-bamd','cr-f-ttmd','cr-f-ttmembers','cr-f-qamember'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+  ['cr-f-pstatus','cr-f-complex','cr-f-cat','cr-f-year','cr-f-sowstatus','cr-f-brdstatus','cr-f-brdreview','cr-f-gac','cr-f-ddsstatus','cr-f-devstatus','cr-f-depstatus','cr-f-itstatus','cr-f-uatstatus','cr-f-training','cr-f-mkt'].forEach(id=>{const el=document.getElementById(id);if(el) el.selectedIndex=0;});
+  ['cr-f-brdduedate','cr-f-ddsdue','cr-f-devdue','cr-f-depdue','cr-f-itdue','cr-f-uatdue'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
   openModal('add-cr');
 }
 
 function saveCR(){
-  const id=document.getElementById('cr-f-edit-id').value;
-  const phases=[1,2,3,4,5].map(p=>({
-    start:document.getElementById(`crph${p}-start`).value,
-    exp_end:document.getElementById(`crph${p}-expend`).value,
-    actual_end:document.getElementById(`crph${p}-actualend`).value,
-    status:document.getElementById(`crph${p}-status`).value,
-    member:document.getElementById(`crph${p}-member`).value,
-  }));
-  const currentPhase=parseInt(document.getElementById('cr-f-phase').value);
-  const delayRisk=phases.some((ph,i)=>ph.status==='In Progress'&&ph.exp_end&&ph.exp_end<TODAY.toISOString().slice(0,10));
+  const editId=document.getElementById('cr-f-edit-id').value;
+  const g=id=>document.getElementById(id)?.value||'';
+  const crNo=g('cr-f-crno');
+  const newId=editId||(crNo||`CR-${g('cr-f-year')}-${String(crProjects.length+1).padStart(3,'0')}`);
   const crData={
-    id:document.getElementById('cr-f-id').value||`CR-${document.getElementById('cr-f-year').value}-${String(crProjects.length+1).padStart(3,'0')}`,
-    name:document.getElementById('cr-f-name').value||'Unnamed CR',
-    category:document.getElementById('cr-f-cat').value,
-    year:document.getElementById('cr-f-year').value,
-    currentPhase,
-    complexity:document.getElementById('cr-f-complex').value,
-    phases,sow:document.getElementById('cr-f-sow').value,
-    training:document.getElementById('cr-f-train').value,
-    marketing:document.getElementById('cr-f-mkt').value,
-    progress:Math.round((currentPhase-1)*20),
-    delayRisk,
-    status:currentPhase===5&&phases[4].status==='Done'?'Deployed':delayRisk?'Delay Risk':'Active'
+    id:newId, crNo, year:g('cr-f-year'), category:g('cr-f-cat'),
+    name:g('cr-f-name')||'Unnamed CR',
+    nameAr:g('cr-f-namear'),
+    projectStatus:g('cr-f-pstatus'),
+    complexity:g('cr-f-complex'),
+    crSowStatus:g('cr-f-sowstatus'),
+    brdDue:g('cr-f-brdduedate'), brdStatus:g('cr-f-brdstatus'),
+    baMandays:parseFloat(g('cr-f-bamd'))||'', ba:g('cr-f-ba'),
+    brdInternalReview:g('cr-f-brdreview'), brdGacApproval:g('cr-f-gac'),
+    ddsStatus:g('cr-f-ddsstatus'), ddsDue:g('cr-f-ddsdue'),
+    ttMandays:parseFloat(g('cr-f-ttmd'))||'', ttMembers:g('cr-f-ttmembers'),
+    devStatus:g('cr-f-devstatus'), devDue:g('cr-f-devdue'),
+    internalTestStatus:g('cr-f-itstatus'), internalTestDue:g('cr-f-itdue'),
+    qaMember:g('cr-f-qamember'),
+    uatStatus:g('cr-f-uatstatus'), uatDue:g('cr-f-uatdue'),
+    training:g('cr-f-training'),
+    deploymentStatus:g('cr-f-depstatus'), deploymentDue:g('cr-f-depdue'),
+    marketing:g('cr-f-mkt'),
   };
-  if(id){const idx=crProjects.findIndex(c=>c.id===id);if(idx>=-0) crProjects[idx]={...crProjects[idx],...crData};}
-  else crProjects.push(crData);
+  if(editId){
+    const idx=crProjects.findIndex(c=>c.id===editId);
+    if(idx>=0) crProjects[idx]={...crProjects[idx],...crData};
+  } else {
+    crProjects.push(crData);
+  }
+  computeAllPhases();
+  saveData();
   closeModal('add-cr');
+  renderCRList();
+  if(document.getElementById('page-data-manager').classList.contains('active')) renderDataManager();
+}
+
+function editCR(id){
+  const cr=crProjects.find(c=>c.id===id);if(!cr) return;
+  document.getElementById('modal-cr-title').textContent='Edit CR — '+cr.id;
+  document.getElementById('cr-f-edit-id').value=cr.id;
+  const sv=(fid,val)=>{const el=document.getElementById(fid);if(el) el.value=val||'';};
+  sv('cr-f-crno',cr.crNo||cr.id);sv('cr-f-name',cr.name);sv('cr-f-namear',cr.nameAr);
+  sv('cr-f-pstatus',cr.projectStatus);sv('cr-f-complex',cr.complexity);
+  sv('cr-f-cat',cr.category);sv('cr-f-year',cr.year);
+  sv('cr-f-sowstatus',cr.crSowStatus);
+  sv('cr-f-brdduedate',cr.brdDue);sv('cr-f-brdstatus',cr.brdStatus);
+  sv('cr-f-bamd',cr.baMandays);sv('cr-f-ba',cr.ba);
+  sv('cr-f-brdreview',cr.brdInternalReview);sv('cr-f-gac',cr.brdGacApproval);
+  sv('cr-f-ddsstatus',cr.ddsStatus);sv('cr-f-ddsdue',cr.ddsDue);
+  sv('cr-f-ttmd',cr.ttMandays);sv('cr-f-ttmembers',cr.ttMembers);
+  sv('cr-f-devstatus',cr.devStatus);sv('cr-f-devdue',cr.devDue);
+  sv('cr-f-itstatus',cr.internalTestStatus);sv('cr-f-itdue',cr.internalTestDue);
+  sv('cr-f-qamember',cr.qaMember);
+  sv('cr-f-uatstatus',cr.uatStatus);sv('cr-f-uatdue',cr.uatDue);
+  sv('cr-f-training',cr.training);
+  sv('cr-f-depstatus',cr.deploymentStatus);sv('cr-f-depdue',cr.deploymentDue);
+  sv('cr-f-mkt',cr.marketing);
+  openModal('add-cr');
+}
+
+function deleteCR(id){
+  const cr=crProjects.find(c=>c.id===id);
+  if(!cr||!confirm(`Delete CR "${cr.name}"? This cannot be undone.`)) return;
+  crProjects=crProjects.filter(c=>c.id!==id);
+  computeAllPhases();
+  saveData();
+  renderDataManager();
   renderCRList();
 }
 
@@ -1480,7 +1805,7 @@ function saveProject(){
   const pData={name:document.getElementById('f-name').value.trim()||'New Project',category:document.getElementById('f-cat').value,start:document.getElementById('f-start').value||'2025-01-01',end:document.getElementById('f-end').value||'2026-12-31',progress:parseInt(document.getElementById('f-progress').value)||0,status:document.getElementById('f-status').value,lead:document.getElementById('f-lead').value,partner:document.getElementById('f-partner').value,milestones,desc:document.getElementById('f-desc').value};
   if(editId){const idx=sectorProjects.findIndex(p=>p.id===parseInt(editId));if(idx>=0) sectorProjects[idx]={...sectorProjects[idx],...pData};}
   else{pData.id=sectorProjects.length+1;sectorProjects.push(pData);}
-  closeModal('add-project');renderOverview();renderProjects();
+  closeModal('add-project');saveData();renderOverview();renderProjects();
 }
 
 function editProject(id){
@@ -1502,8 +1827,50 @@ function editProject(id){
 
 function saveNote(){
   notes.push({type:document.getElementById('n-type').value,proj:document.getElementById('n-proj').value||'General',desc:document.getElementById('n-desc').value||'',by:document.getElementById('n-by').value||'Unknown',date:document.getElementById('n-date').value||TODAY.toISOString().slice(0,10)});
-  closeModal('add-note');
+  closeModal('add-note');saveData();
   if(document.getElementById('page-risks').classList.contains('active')) renderNotes();
+}
+
+// ═══════════════ DATA MANAGER ═══════════════
+function renderDataManager(){
+  const dsSt=v=>{
+    if(!v||v==='-') return '<span class="dm-status-pend">—</span>';
+    const l=v.toLowerCase();
+    if(l==='done'||l==='approved'||l==='published') return `<span class="dm-status-done">${v}</span>`;
+    if(l.includes('progress')||l==='testing'||l==='ready') return `<span class="dm-status-ip">${v}</span>`;
+    if(l.includes('hold')) return `<span class="dm-status-hold">${v}</span>`;
+    return `<span class="dm-status-pend">${v}</span>`;
+  };
+  const td=v=>`<td title="${v||''}">${dsSt(v)}</td>`;
+  const tdt=v=>`<td style="font-size:9px;color:var(--muted)">${v||'—'}</td>`;
+  let html=crProjects.map((cr,i)=>{
+    const sc={Deployed:'badge-green',Development:'badge-blue','On Hold':'badge-amber','Ready for Deployment':'badge-blue',Testing:'badge-blue','In Pipeline':'badge-gray','Development Queued':'badge-gray',Analysis:'badge-gray'};
+    return `<tr>
+      <td style="font-weight:700;color:var(--muted);text-align:center">${i+1}</td>
+      <td style="font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
+      <td style="min-width:200px;white-space:normal;font-weight:600;color:var(--p3);line-height:1.3">${cr.name}<br><span style="font-size:8px;color:var(--muted);font-weight:400" dir="rtl">${cr.nameAr||''}</span></td>
+      <td><span class="badge ${sc[cr.projectStatus]||'badge-gray'}" style="font-size:8px">${cr.projectStatus||'—'}</span></td>
+      <td><span class="badge ${cr.complexity==='High'?'badge-red':cr.complexity==='Low'?'badge-green':'badge-gray'}" style="font-size:8px">${cr.complexity||'—'}</span></td>
+      ${td(cr.crSowStatus)} ${tdt(cr.brdDue)} ${td(cr.brdStatus)} ${tdt(cr.baMandays)} ${tdt(cr.ba)} ${td(cr.brdInternalReview)} ${td(cr.brdGacApproval)}
+      ${td(cr.ddsStatus)} ${tdt(cr.ddsDue)} ${tdt(cr.ttMandays)} <td style="max-width:120px;white-space:normal;font-size:9px">${cr.ttMembers||'—'}</td> ${td(cr.devStatus)} ${tdt(cr.devDue)}
+      ${td(cr.internalTestStatus)} ${tdt(cr.internalTestDue)} ${tdt(cr.qaMember)} ${td(cr.uatStatus)}
+      ${tdt(cr.uatDue)} ${td(cr.training)} ${td(cr.deploymentStatus)} ${tdt(cr.deploymentDue)}
+      <td style="white-space:nowrap">
+        <button class="btn btn-outline" style="font-size:9px;padding:3px 8px;margin-right:3px" onclick="editCR('${cr.id.replace(/'/g,"\\'")}')">✎ Edit</button>
+        <button class="btn" style="font-size:9px;padding:3px 8px;color:var(--risk);border-color:var(--risk);background:transparent" onclick="deleteCR('${cr.id.replace(/'/g,"\\'")}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('dm-tbody').innerHTML=html||`<tr><td colspan="30" style="text-align:center;padding:20px;color:var(--muted)">No CRs yet. Click + Add CR to start.</td></tr>`;
+}
+
+function exportDataManagerXLSX(){
+  const headers=['#','CR No','Project Name (EN)','Arabic Name','Project Status','Complexity','SOW Status','BRD Due','BRD Status','BA Mandays','BA','BRD Review','GAC Approval','DDS Status','DDS Due','TT Mandays','TT Members','Dev Status','Dev Due','Int.Test Status','Int.Test Due','QA Member','UAT Status','UAT Due','Training','Deploy Status','Deploy Due','Marketing'];
+  const rows=crProjects.map((cr,i)=>[i+1,cr.crNo||cr.id,cr.name,cr.nameAr,cr.projectStatus,cr.complexity,cr.crSowStatus,cr.brdDue,cr.brdStatus,cr.baMandays,cr.ba,cr.brdInternalReview,cr.brdGacApproval,cr.ddsStatus,cr.ddsDue,cr.ttMandays,cr.ttMembers,cr.devStatus,cr.devDue,cr.internalTestStatus,cr.internalTestDue,cr.qaMember,cr.uatStatus,cr.uatDue,cr.training,cr.deploymentStatus,cr.deploymentDue,cr.marketing]);
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
+  XLSX.utils.book_append_sheet(wb,ws,'CR Tracker');
+  XLSX.writeFile(wb,'alnadeeb_cr_tracker_export.xlsx');
 }
 
 // ═══════════════ IMPORT TABS ═══════════════
@@ -1647,8 +2014,7 @@ if(dz){
 
 // Init
 document.getElementById('n-date').value=TODAY.toISOString().slice(0,10);
-// Wire "Add CR" button
-document.querySelectorAll('button').forEach(b=>{if(b.textContent.trim()==='+  Add CR'||b.textContent.trim()==='+ Add CR') b.onclick=openAddCRModal;});
+loadData();       // restore saved data from localStorage (or keep demo data if first load)
 renderOverview();
 </script>
 </body>
