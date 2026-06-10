@@ -47,7 +47,7 @@ tbody tr td{padding:6px 10px;border-bottom:1px solid #ede7f6;vertical-align:midd
     <h1>Training — CR Status Input</h1>
     <p>Update training status for each CR. Changes save automatically.</p>
   </div>
-  <a href="index.html" class="back-link">← Main Dashboard</a>
+  <a href="#" class="back-link" onclick="returnToMain();return false;">← Main Dashboard</a>
 </div>
 
 <div class="save-bar">
@@ -121,6 +121,12 @@ function load(){
   render();
 }
 load();
+function returnToMain(){
+  const u=prompt('Username (Main Dashboard):');if(u===null) return;
+  const p=prompt('Password:');if(p===null) return;
+  if(u==='pmo'&&p==='pmo123') window.location.href='index.html';
+  else alert('Incorrect credentials. Access denied.');
+}
 </script>
 </body>
 </html>

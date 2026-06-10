@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>C&L IT Sector Dashboard</title>
+<title>Customs & Logistics Sector Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -329,8 +329,8 @@ input[type=file]{display:none}
   <div class="logo-area">
     <div class="logo-icon">C&L</div>
     <div>
-      <h1>IT Sector</h1>
-      <p>Portfolio Dashboard</p>
+      <h1>Customs & Logistics</h1>
+      <p>Sector Dashboard</p>
     </div>
   </div>
   <div class="nav-section">Overview</div>
@@ -347,6 +347,12 @@ input[type=file]{display:none}
   <div class="nav-section">Data</div>
   <div class="nav-item" onclick="showPage('data-manager',this)">▪ CR Data Manager</div>
   <div class="nav-item" onclick="showPage('import',this)">▪ Import / Export</div>
+  <div class="nav-section">Team Input Pages</div>
+  <div class="nav-item" onclick="location.href='csi.html'" style="font-size:11px">▪ CSI Team (BA)</div>
+  <div class="nav-item" onclick="location.href='tt.html'" style="font-size:11px">▪ TT Team (Dev)</div>
+  <div class="nav-item" onclick="location.href='qa.html'" style="font-size:11px">▪ QA Team</div>
+  <div class="nav-item" onclick="location.href='training.html'" style="font-size:11px">▪ Training</div>
+  <div class="nav-item" onclick="location.href='marketing.html'" style="font-size:11px">▪ Marketing</div>
   <div class="sidebar-footer" id="sidebar-period">Period: 2024 – 2026<br>Last updated: May 2025</div>
 </div>
 
@@ -382,10 +388,10 @@ input[type=file]{display:none}
       <div class="card-title"><div class="card-title-left">Upcoming IT Project Milestones</div><div style="font-size:9px;color:var(--muted)">Next 12 months</div></div>
       <div id="ov-milestones"></div>
     </div>
-    <!-- CR Projects by Phase Status — count per phase -->
+    <!-- CR Projects by Classification and Status — stacked horizontal bar -->
     <div class="card">
-      <div class="card-title"><div class="card-title-left">CR Projects by Status</div><div style="font-size:9px;color:var(--muted)" id="cr-total-label">Total: 52</div></div>
-      <div id="ov-phase-status"></div>
+      <div class="card-title"><div class="card-title-left">CR Projects by Classification and Status</div><div style="font-size:9px;color:var(--muted)" id="cr-total-label">Total: 52</div></div>
+      <div style="position:relative;height:220px"><canvas id="classStatusChart" role="img" aria-label="Projects by classification and status">Classification status chart</canvas></div>
     </div>
   </div>
 
@@ -466,11 +472,8 @@ input[type=file]{display:none}
       <div style="position:relative;height:220px"><canvas id="classComplexChart" role="img" aria-label="Grouped bar chart of projects by classification and complexity">Classification complexity data</canvas></div>
     </div>
     <div class="card">
-      <div class="card-title"><div class="card-title-left">Projects by Status</div></div>
-      <div style="display:flex;gap:16px;align-items:flex-start">
-        <div style="position:relative;width:120px;height:120px;flex-shrink:0"><canvas id="statusDonut" role="img" aria-label="Status distribution donut">Status distribution</canvas></div>
-        <div style="flex:1" id="status-legend"></div>
-      </div>
+      <div class="card-title"><div class="card-title-left">Projects by Status</div><div style="font-size:9px;color:var(--muted)" id="ps-total-label"></div></div>
+      <div style="position:relative;height:220px"><canvas id="statusDonut" role="img" aria-label="Projects by actual status">Projects by status</canvas></div>
     </div>
   </div>
 
@@ -598,32 +601,67 @@ input[type=file]{display:none}
       <div class="tab" onclick="showAllocTab('tt',this)">TT Team (Dev & Deploy)</div>
       <div class="tab" onclick="showAllocTab('qa',this)">QA Team (QA & UAT)</div>
     </div>
-    <button class="btn btn-primary" style="margin-left:auto" onclick="downloadAllocTemplate()">↓ Download Team Sheet</button>
-    <button class="btn btn-outline" onclick="document.getElementById('alloc-file').click()">↑ Upload Team Sheet</button>
-    <input type="file" id="alloc-file" accept=".xlsx,.csv" onchange="handleAllocUpload(event)">
+    <span style="margin-left:auto;font-size:10px;color:var(--muted)">Live data from CR list — edit via CR Data Manager</span>
   </div>
   <div id="alloc-csi" class="alloc-tab-pane">
-    <div class="card">
-      <div class="card-title"><div class="card-title-left">CSI Team — Business Analysis (Phase 1)</div></div>
-      <table class="data-table" id="alloc-csi-table"><thead><tr><th>CR ID</th><th>CR Name</th><th>Member Name</th><th>Start Date</th><th>Expected End</th><th>Actual End</th><th>Status</th><th>Delay?</th></tr></thead><tbody id="alloc-csi-body"></tbody></table>
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:14px">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="card-title" style="padding:12px 14px 10px"><div class="card-title-left">CSI Team — Business Analysis</div></div>
+        <table class="data-table" id="alloc-csi-table"><thead><tr><th>CR ID</th><th>CR Name</th><th>BA Member</th><th>BRD Status</th><th>BRD Due</th><th>Project Status</th><th>Complexity</th></tr></thead><tbody id="alloc-csi-body"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-title-left">CRs per BA Member</div></div>
+        <div style="position:relative;height:180px"><canvas id="csi-alloc-chart"></canvas></div>
+        <div id="csi-alloc-legend" style="margin-top:8px"></div>
+      </div>
     </div>
   </div>
   <div id="alloc-tt" class="alloc-tab-pane" style="display:none">
-    <div class="card">
-      <div class="card-title"><div class="card-title-left">TT Team — Development (Phase 2) & Deployment (Phase 5)</div></div>
-      <table class="data-table"><thead><tr><th>CR ID</th><th>CR Name</th><th>Phase</th><th>Member Name</th><th>Start Date</th><th>Expected End</th><th>Actual End</th><th>Status</th><th>Delay?</th></tr></thead><tbody id="alloc-tt-body"></tbody></table>
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:14px">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="card-title" style="padding:12px 14px 10px"><div class="card-title-left">TT Team — Development & Deployment</div></div>
+        <table class="data-table"><thead><tr><th>CR ID</th><th>CR Name</th><th>TT Members</th><th>Dev Status</th><th>Dev Due</th><th>Deploy Status</th><th>Deploy Due</th></tr></thead><tbody id="alloc-tt-body"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-title-left">CRs per TT Member</div></div>
+        <div style="position:relative;height:180px"><canvas id="tt-alloc-chart"></canvas></div>
+        <div id="tt-alloc-legend" style="margin-top:8px"></div>
+      </div>
     </div>
   </div>
   <div id="alloc-qa" class="alloc-tab-pane" style="display:none">
-    <div class="card">
-      <div class="card-title"><div class="card-title-left">QA Team — Quality Assurance (Phase 3) & UAT (Phase 4)</div></div>
-      <table class="data-table"><thead><tr><th>CR ID</th><th>CR Name</th><th>Phase</th><th>Member Name</th><th>Start Date</th><th>Expected End</th><th>Actual End</th><th>Status</th><th>Delay?</th></tr></thead><tbody id="alloc-qa-body"></tbody></table>
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:14px">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="card-title" style="padding:12px 14px 10px"><div class="card-title-left">QA Team — Testing & UAT</div></div>
+        <table class="data-table"><thead><tr><th>CR ID</th><th>CR Name</th><th>QA Member</th><th>Int.Test Status</th><th>UAT Status</th><th>UAT Due</th><th>Project Status</th></tr></thead><tbody id="alloc-qa-body"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-title-left">CRs per QA Member</div></div>
+        <div style="position:relative;height:180px"><canvas id="qa-alloc-chart"></canvas></div>
+        <div id="qa-alloc-legend" style="margin-top:8px"></div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════ IMPORT ═══════════════ -->
 <div id="page-import" class="page">
+  <!-- IMPORTANT: JSON Backup & Restore -->
+  <div class="card" style="margin-bottom:14px;border-left:4px solid var(--p1);background:#fdf9f6">
+    <div class="card-title"><div class="card-title-left" style="color:var(--p1)">Data Backup & Restore — Protect Your Work</div></div>
+    <p style="font-size:11px;color:var(--text);margin-bottom:12px;line-height:1.7">
+      All edits (team inputs, new CRs, status updates) are stored in <strong>this browser's localStorage</strong>.
+      If you clear browser cache, switch browsers, or use a different machine — data will be gone.
+      <strong>Download a JSON backup regularly</strong> and restore it anytime.
+    </p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="backupJSON()">↓ Download Backup (JSON)</button>
+      <button class="btn btn-outline" onclick="document.getElementById('json-restore-file').click()">↑ Restore from Backup</button>
+      <input type="file" id="json-restore-file" accept=".json" onchange="restoreJSON(event)" style="display:none">
+      <span id="restore-status" style="font-size:10px;color:var(--muted)"></span>
+    </div>
+  </div>
+
   <div class="grid-2">
     <div class="card">
       <div class="card-title"><div class="card-title-left">Import Data from Excel</div></div>
@@ -1072,7 +1110,8 @@ function showSaveBadge(cls,msg){
 
 let crCatFilter='all',crYearFilter='all';
 let allocTab='csi';
-let catDonutChart,statusDonutChart,classComplexChartInst,sowChartInst,trainChartInst,mktChartInst;
+let catDonutChart,statusDonutChart,classComplexChartInst,sowChartInst,trainChartInst,mktChartInst,classStatusChartInst;
+let csiAllocChart,ttAllocChart,qaAllocChart;
 
 // ═══════════════ NAVIGATION ═══════════════
 function showPage(id,el){
@@ -1137,31 +1176,41 @@ function renderOverview(){
   });
   document.getElementById('ov-milestones').innerHTML = msHtml;
 
-  // CR by Phase Status — stacked bar per phase showing Done / In Progress counts
-  const PHASE_SHORT = ['Phase 1 — BA','Phase 2 — Dev','Phase 3 — QA','Phase 4 — UAT','Phase 5 — Deploy'];
-  const phaseStatColors = {Done:'#27ae60','In Progress':PHASE_COLORS[0],Pending:'#e0d8cf'};
-  let phStatusHtml = `<div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap">
-    <span style="display:flex;align-items:center;gap:4px;font-size:9px"><span style="width:9px;height:9px;border-radius:2px;background:#27ae60;display:inline-block"></span>Done</span>
-    <span style="display:flex;align-items:center;gap:4px;font-size:9px"><span style="width:9px;height:9px;border-radius:2px;background:${PHASE_COLORS[0]};display:inline-block"></span>In Progress</span>
-    <span style="display:flex;align-items:center;gap:4px;font-size:9px"><span style="width:9px;height:9px;border-radius:2px;background:#e0d8cf;display:inline-block"></span>Pending</span>
-  </div>`;
-  PHASE_SHORT.forEach((label,i)=>{
-    const done = crs.filter(c=>c.phases[i]&&c.phases[i].status==='Done').length;
-    const inprog = crs.filter(c=>c.phases[i]&&c.phases[i].status==='In Progress').length;
-    const pend = crs.filter(c=>c.phases[i]&&c.phases[i].status==='Pending').length;
-    const total = crs.length||1;
-    const dW=Math.round(done/total*100), ipW=Math.round(inprog/total*100), pW=Math.round(pend/total*100);
-    phStatusHtml += `<div style="display:grid;grid-template-columns:130px 1fr 70px;gap:8px;align-items:center;margin-bottom:7px">
-      <div style="font-size:10px;font-weight:600;color:${PHASE_COLORS[i]}">${label}</div>
-      <div style="height:16px;border-radius:3px;overflow:hidden;display:flex;background:#f0ede8">
-        ${done>0?`<div style="width:${dW}%;background:#27ae60;height:100%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff" title="Done: ${done}">${done}</div>`:''}
-        ${inprog>0?`<div style="width:${ipW}%;background:${PHASE_COLORS[i]};height:100%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff" title="In Progress: ${inprog}">${inprog}</div>`:''}
-        ${pend>0?`<div style="width:${pW}%;background:#ddd;height:100%;display:flex;align-items:center;justify-content:center;font-size:8px;color:#888" title="Pending: ${pend}">${pend}</div>`:''}
-      </div>
-      <div style="font-size:9px;color:var(--muted);text-align:right">${done}✓ ${inprog>0?inprog+'▶':''}</div>
-    </div>`;
+  // CR Projects by Classification and Status — stacked horizontal bar chart
+  const PS_STATUSES = ['Analysis','Deployed','Development','Development Queued','In Pipeline','On Hold','Ready for Deployment','Testing'];
+  const PS_COLORS   = ['#9b59b6','#27ae60','#e67e22','#3498db','#95a5a6','#f39c12','#1abc9c','#e74c3c'];
+  const catKeys = Object.keys(CR_CATS);
+  const catFullNames = catKeys.map(k=>CR_CATS[k]);
+  if(classStatusChartInst) classStatusChartInst.destroy();
+  classStatusChartInst = new Chart(document.getElementById('classStatusChart'),{
+    type:'bar',
+    data:{
+      labels: catFullNames,
+      datasets: PS_STATUSES.map((st,si)=>({
+        label: st,
+        data: catKeys.map(cat=>{
+          const catCrs = crs.filter(c=>c.category===cat);
+          return catCrs.length ? Math.round(catCrs.filter(c=>c.projectStatus===st).length/catCrs.length*100) : 0;
+        }),
+        backgroundColor: PS_COLORS[si],
+        borderWidth:0,
+      }))
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        x:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{size:9,family:'Cairo'}}},
+        y:{stacked:true,ticks:{font:{size:9,family:'Cairo'}}}
+      },
+      plugins:{
+        legend:{position:'top',labels:{font:{size:9,family:'Cairo'},boxWidth:10,padding:6}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.x}%`}}
+      }
+    }
   });
-  document.getElementById('ov-phase-status').innerHTML = phStatusHtml;
+  document.getElementById('cr-total-label').textContent=`Total: ${crs.length}`;
 
   // Category donut
   const cats=Object.keys(CR_CATS);
@@ -1311,8 +1360,8 @@ function renderCROverview(){
   const gyr=document.getElementById('global-year').value;
   let crs=gyr==='all'?crProjects:crProjects.filter(c=>c.year===gyr);
   document.getElementById('cr-ov-total').textContent=crs.length;
-  document.getElementById('cr-ov-active').textContent=crs.filter(c=>c.status==='Active').length;
-  document.getElementById('cr-ov-deployed').textContent=crs.filter(c=>c.status==='Deployed').length;
+  document.getElementById('cr-ov-deployed').textContent=crs.filter(c=>c.projectStatus==='Deployed').length;
+  document.getElementById('cr-ov-active').textContent=crs.filter(c=>c.projectStatus!=='Deployed').length;
   document.getElementById('cr-ov-delay').textContent=crs.filter(c=>c.delayRisk).length;
 
   // Class complexity grouped bar
@@ -1331,17 +1380,37 @@ function renderCROverview(){
     options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:false,ticks:{font:{size:9,family:'Cairo'}}},y:{ticks:{font:{size:9,family:'Cairo'}}}},plugins:{legend:{labels:{font:{size:10,family:'Cairo'},boxWidth:10}}}}
   });
 
-  // Status donut
+  // Projects by actual Status — horizontal bar chart
+  const ALL_STATUSES=['Analysis','Deployed','Development','Development Queued','In Pipeline','On Hold','Ready for Deployment','Testing'];
+  const ST_COLORS_MAP={Analysis:'#9b59b6',Deployed:'#27ae60',Development:'#e67e22','Development Queued':'#3498db','In Pipeline':'#95a5a6','On Hold':'#f39c12','Ready for Deployment':'#1abc9c',Testing:'#e74c3c'};
+  const stCounts=ALL_STATUSES.map(st=>crs.filter(c=>c.projectStatus===st).length);
+  const stTotal=crs.length||1;
+  document.getElementById('ps-total-label').textContent=`Total: ${crs.length}`;
   if(statusDonutChart) statusDonutChart.destroy();
-  const deployed=crs.filter(c=>c.status==='Deployed').length;
-  const active=crs.filter(c=>c.status==='Active').length;
-  const delay=crs.filter(c=>c.delayRisk).length;
   statusDonutChart=new Chart(document.getElementById('statusDonut'),{
-    type:'doughnut',
-    data:{labels:['Deployed','Active','Delay Risk'],datasets:[{data:[deployed,active-delay,delay],backgroundColor:['#27ae60','#8B556A','#c0392b'],borderWidth:2,borderColor:'#fff'}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}}}
+    type:'bar',
+    data:{
+      labels:ALL_STATUSES,
+      datasets:[{
+        data:stCounts,
+        backgroundColor:ALL_STATUSES.map(s=>ST_COLORS_MAP[s]),
+        borderWidth:0,
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x} CRs (${Math.round(ctx.parsed.x/stTotal*100)}%)`}}
+      },
+      scales:{
+        x:{ticks:{font:{size:9,family:'Cairo'}},beginAtZero:true},
+        y:{ticks:{font:{size:9,family:'Cairo'}}}
+      }
+    }
   });
-  document.getElementById('status-legend').innerHTML=[{l:'Deployed',c:'#27ae60',v:deployed},{l:'Active',c:'#8B556A',v:active-delay},{l:'Delay Risk',c:'#c0392b',v:delay}].map(x=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><div style="width:10px;height:10px;border-radius:2px;background:${x.c}"></div><span style="font-size:10px">${x.l}: <strong>${x.v}</strong></span></div>`).join('');
 
   // CR Phase Status detail table — replaces old classification × status stacked bars
   // Shows: per phase row → Done / In Progress / Pending counts + mini bar
@@ -1685,31 +1754,83 @@ function showAllocTab(tab,el){
   document.querySelectorAll('#page-allocation .tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
 }
+
+function allocPieChart(canvasId,legendId,memberMap,chartRef,colorBase){
+  const ctx=document.getElementById(canvasId);if(!ctx) return null;
+  if(chartRef) chartRef.destroy();
+  const members=Object.keys(memberMap).filter(m=>m&&m!=='TBD'&&m!=='—');
+  if(!members.length){ctx.parentElement.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">No member data in CR list yet</div>';return null;}
+  const palette=['#782D55','#8B556A','#A29475','#5C243F','#C1BBA8','#E0AC92','#9b59b6','#3498db','#27ae60','#e67e22'];
+  const chart=new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:members,
+      datasets:[{data:members.map(m=>memberMap[m]),backgroundColor:members.map((_,i)=>palette[i%palette.length]),borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} CRs`}}}}
+  });
+  document.getElementById(legendId).innerHTML=members.map((m,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div style="width:9px;height:9px;border-radius:2px;background:${palette[i%palette.length]};flex-shrink:0"></div><span style="font-size:10px">${m}: <strong>${memberMap[m]}</strong></span></div>`).join('');
+  return chart;
+}
+
 function renderAllocation(){
-  const buildRows=(team,phases)=>{
-    let html='';
-    crProjects.filter(cr=>cr.phases.some((ph,i)=>phases.includes(i+1)&&ph.status!=='Pending')).forEach(cr=>{
-      phases.forEach(phNum=>{
-        const ph=cr.phases[phNum-1];
-        if(ph.status==='Pending') return;
-        const delay=ph.status==='In Progress'&&ph.exp_end<TODAY.toISOString().slice(0,10);
-        html+=`<tr>
-          <td style="font-size:10px;font-weight:700;color:var(--p3)">${cr.id}</td>
-          ${team==='tt'?`<td style="font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cr.name}</td><td><span class="phase-chip ${['ph1','ph2','ph3','ph4','ph5'][phNum-1]}">${PHASE_NAMES[phNum-1]}</span></td>`:team==='qa'?`<td style="font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cr.name}</td><td><span class="phase-chip ${['ph1','ph2','ph3','ph4','ph5'][phNum-1]}">${PHASE_NAMES[phNum-1]}</span></td>`:`<td style="font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cr.name}</td>`}
-          <td style="font-size:10px;font-weight:600">${ph.member||'TBD'}</td>
-          <td style="font-size:10px">${ph.start||'—'}</td>
-          <td style="font-size:10px">${ph.exp_end||'—'}</td>
-          <td style="font-size:10px;color:var(--ok)">${ph.actual_end||'—'}</td>
-          <td><span class="badge ${ph.status==='Done'?'badge-green':ph.status==='In Progress'?'badge-blue':'badge-gray'}">${ph.status}</span></td>
-          <td>${delay?'<span class="delay-flag">⚠ Delay</span>':'<span style="color:var(--ok);font-size:10px">—</span>'}</td>
-        </tr>`;
-      });
-    });
-    return html||`<tr><td colspan="9" style="text-align:center;padding:14px;color:var(--muted)">No active assignments</td></tr>`;
-  };
-  document.getElementById('alloc-csi-body').innerHTML=buildRows('csi',[1]);
-  document.getElementById('alloc-tt-body').innerHTML=buildRows('tt',[2,5]);
-  document.getElementById('alloc-qa-body').innerHTML=buildRows('qa',[3,4]);
+  const stBadge=(s,ok)=>s?`<span class="badge ${s.toLowerCase()==='done'?'badge-green':s.toLowerCase().includes('progress')?'badge-blue':s.toLowerCase().includes('hold')?'badge-amber':'badge-gray'}">${s}</span>`:'<span class="badge badge-gray">—</span>';
+
+  // ── CSI ──
+  const csiMap={};
+  let csiHtml='';
+  crProjects.forEach(cr=>{
+    if(!cr.ba) return;
+    const members=cr.ba.split(',').map(m=>m.trim()).filter(Boolean);
+    members.forEach(m=>{csiMap[m]=(csiMap[m]||0)+1;});
+    csiHtml+=`<tr>
+      <td style="font-size:10px;font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
+      <td style="font-size:10px;max-width:180px;white-space:normal;line-height:1.3">${cr.name}</td>
+      <td style="font-size:10px;font-weight:600;color:#880e4f">${cr.ba||'—'}</td>
+      <td>${stBadge(cr.brdStatus)}</td>
+      <td style="font-size:10px;color:var(--muted)">${cr.brdDue||'—'}</td>
+      <td>${stBadge(cr.projectStatus)}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${cr.complexity==='High'?'var(--risk)':cr.complexity==='Low'?'var(--ok)':'var(--muted)'}">${cr.complexity||'—'}</span></td>
+    </tr>`;
+  });
+  document.getElementById('alloc-csi-body').innerHTML=csiHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">No data</td></tr>`;
+  csiAllocChart=allocPieChart('csi-alloc-chart','csi-alloc-legend',csiMap,csiAllocChart,'#880e4f');
+
+  // ── TT ──
+  const ttMap={};
+  let ttHtml='';
+  crProjects.filter(cr=>cr.ttMembers||cr.devStatus).forEach(cr=>{
+    if(cr.ttMembers){const ms=cr.ttMembers.split(',').map(m=>m.trim()).filter(Boolean);ms.forEach(m=>{ttMap[m]=(ttMap[m]||0)+1;});}
+    ttHtml+=`<tr>
+      <td style="font-size:10px;font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
+      <td style="font-size:10px;max-width:160px;white-space:normal;line-height:1.3">${cr.name}</td>
+      <td style="font-size:9px;color:#1a237e;max-width:140px;white-space:normal;line-height:1.3">${cr.ttMembers||'—'}</td>
+      <td>${stBadge(cr.devStatus)}</td>
+      <td style="font-size:10px;color:var(--muted)">${cr.devDue||'—'}</td>
+      <td>${stBadge(cr.deploymentStatus)}</td>
+      <td style="font-size:10px;color:var(--muted)">${cr.deploymentDue||'—'}</td>
+    </tr>`;
+  });
+  document.getElementById('alloc-tt-body').innerHTML=ttHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">No data</td></tr>`;
+  ttAllocChart=allocPieChart('tt-alloc-chart','tt-alloc-legend',ttMap,ttAllocChart,'#1a237e');
+
+  // ── QA ──
+  const qaMap={};
+  let qaHtml='';
+  crProjects.filter(cr=>cr.qaMember||cr.internalTestStatus||cr.uatStatus).forEach(cr=>{
+    if(cr.qaMember){const ms=cr.qaMember.split(',').map(m=>m.trim()).filter(Boolean);ms.forEach(m=>{qaMap[m]=(qaMap[m]||0)+1;});}
+    qaHtml+=`<tr>
+      <td style="font-size:10px;font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
+      <td style="font-size:10px;max-width:160px;white-space:normal;line-height:1.3">${cr.name}</td>
+      <td style="font-size:10px;font-weight:600;color:#004d40">${cr.qaMember||'—'}</td>
+      <td>${stBadge(cr.internalTestStatus)}</td>
+      <td>${stBadge(cr.uatStatus)}</td>
+      <td style="font-size:10px;color:var(--muted)">${cr.uatDue||'—'}</td>
+      <td>${stBadge(cr.projectStatus)}</td>
+    </tr>`;
+  });
+  document.getElementById('alloc-qa-body').innerHTML=qaHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">No data</td></tr>`;
+  qaAllocChart=allocPieChart('qa-alloc-chart','qa-alloc-legend',qaMap,qaAllocChart,'#004d40');
 }
 
 // ═══════════════ MODALS ═══════════════
@@ -2002,7 +2123,33 @@ function handleAllocUpload(event){
   reader.readAsArrayBuffer(file);
 }
 
-function downloadAllocTemplate(){downloadTemplate('allocation');}
+// ═══════════════ JSON BACKUP / RESTORE ═══════════════
+function backupJSON(){
+  const data={crs:crProjects,projects:sectorProjects,notes,timestamp:new Date().toISOString(),version:2};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='alnadeeb_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+function restoreJSON(event){
+  const file=event.target.files[0];if(!file) return;
+  const st=document.getElementById('restore-status');
+  st.textContent='Restoring…';st.style.color='var(--info)';
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.crs&&Array.isArray(data.crs)) crProjects=data.crs;
+      if(data.projects&&Array.isArray(data.projects)) sectorProjects=data.projects;
+      if(data.notes&&Array.isArray(data.notes)) notes=data.notes;
+      computeAllPhases();saveData();
+      st.textContent=`✓ Restored ${crProjects.length} CRs from ${file.name}`;st.style.color='var(--ok)';
+      showPage('overview',document.querySelector('.nav-item'));
+    }catch(err){st.textContent='✗ Error: '+err.message;st.style.color='var(--risk)';}
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
 
 // Drag & Drop
 const dz=document.getElementById('drop-zone');
