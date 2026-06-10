@@ -19,7 +19,7 @@ html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:
 .shell{display:flex;height:100vh;min-height:700px}
 
 /* SIDEBAR */
-.sidebar{width:210px;min-width:210px;background:var(--p3);display:flex;flex-direction:column}
+.sidebar{width:210px;min-width:210px;background:var(--p3);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
 .logo-area{padding:16px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px}
 .logo-icon{width:38px;height:38px;background:var(--p6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--p3);font-size:13px;flex-shrink:0}
 .logo-area h1{color:#fff;font-size:13px;font-weight:700;line-height:1.3}
@@ -473,7 +473,10 @@ input[type=file]{display:none}
     </div>
     <div class="card">
       <div class="card-title"><div class="card-title-left">Projects by Status</div><div style="font-size:9px;color:var(--muted)" id="ps-total-label"></div></div>
-      <div style="position:relative;height:220px"><canvas id="statusDonut" role="img" aria-label="Projects by actual status">Projects by status</canvas></div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="position:relative;width:140px;height:140px;flex-shrink:0"><canvas id="statusDonut" role="img" aria-label="Projects by actual status"></canvas></div>
+        <div id="status-legend" style="flex:1;margin-top:4px"></div>
+      </div>
     </div>
   </div>
 
@@ -957,6 +960,8 @@ input[type=file]{display:none}
 <script>
 // ═══════════════ DATA ═══════════════
 const TODAY = new Date();
+// ── GLOBAL: days past due before a CR is flagged High Risk (change here to adjust) ──
+const DELAY_THRESHOLD_DAYS = 5;
 const CR_CATS = {CSI:'Continuous Service Improvement',OPS:'Operational',STR:'Strategic',PRE:'Process Re-Engineering',DIG:'Digital Transformation'};
 const CR_CAT_COLORS = {CSI:'#782D55',OPS:'#8B556A',STR:'#5C243F',PRE:'#A29475',DIG:'#E0AC92'};
 const PHASE_NAMES = ['BA (CSI)','Dev (TT)','QA','UAT (QA)','Deploy (TT)'];
@@ -997,7 +1002,13 @@ function computeAllPhases(){
     const inp=cr.phases.filter(p=>p.status==='In Progress').length;
     cr.currentPhase=cr.phases.reduce((a,p,i)=>p.status==='In Progress'?i+1:p.status==='Done'?Math.max(a,i+1):a,1);
     cr.progress=Math.round(done*20+inp*10);
-    cr.delayRisk=cr.phases.some(p=>p.status==='In Progress'&&p.exp_end&&p.exp_end<TODAY.toISOString().slice(0,10));
+    const thresholdDate=new Date(TODAY);thresholdDate.setDate(thresholdDate.getDate()-DELAY_THRESHOLD_DAYS);
+    const thStr=thresholdDate.toISOString().slice(0,10);
+    const phaseOverdue=cr.phases.some(p=>p.status==='In Progress'&&p.exp_end&&p.exp_end<thStr);
+    const brdOverdue=cr.brdStatus!=='Done'&&cr.brdDue&&cr.brdDue<thStr;
+    const devOverdue=cr.devStatus!=='Done'&&cr.devDue&&cr.devDue<thStr;
+    const depOverdue=cr.deploymentStatus!=='Done'&&cr.deploymentDue&&cr.deploymentDue<thStr;
+    cr.delayRisk=phaseOverdue||!!brdOverdue||!!devOverdue||!!depOverdue;
     cr.status=done===5?'Deployed':cr.delayRisk?'Delay Risk':'Active';
     // legacy compat flags
     cr.sow=cr.crSowStatus==='Approved'?'Yes':'No';
@@ -1082,9 +1093,10 @@ function saveData(){
 }
 
 function loadData(){
+  let needSeed=false;
   try{
     const sc=localStorage.getItem(LS.crs);
-    if(sc) crProjects=JSON.parse(sc);
+    if(sc) crProjects=JSON.parse(sc); else needSeed=true;
     const sp=localStorage.getItem(LS.proj);
     if(sp) sectorProjects=JSON.parse(sp);
     const sn=localStorage.getItem(LS.notes);
@@ -1093,6 +1105,8 @@ function loadData(){
     if(ts) showSaveBadge('saved','Last saved '+ts.slice(0,10)+' '+ts.slice(11,16));
   }catch(e){console.warn('loadData error',e);}
   computeAllPhases();
+  // Seed localStorage on first open so team pages can immediately read the CR list
+  if(needSeed) saveData();
 }
 
 function clearAllData(){
@@ -1176,9 +1190,9 @@ function renderOverview(){
   });
   document.getElementById('ov-milestones').innerHTML = msHtml;
 
-  // CR Projects by Classification and Status — stacked horizontal bar chart
+  // CR Projects by Classification and Status — stacked horizontal bar chart (website palette)
   const PS_STATUSES = ['Analysis','Deployed','Development','Development Queued','In Pipeline','On Hold','Ready for Deployment','Testing'];
-  const PS_COLORS   = ['#9b59b6','#27ae60','#e67e22','#3498db','#95a5a6','#f39c12','#1abc9c','#e74c3c'];
+  const PS_COLORS   = ['#A29475','#27ae60','#782D55','#8B556A','#C1BBA8','#e67e22','#5C243F','#E0AC92'];
   const catKeys = Object.keys(CR_CATS);
   const catFullNames = catKeys.map(k=>CR_CATS[k]);
   if(classStatusChartInst) classStatusChartInst.destroy();
@@ -1380,37 +1394,42 @@ function renderCROverview(){
     options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:false,ticks:{font:{size:9,family:'Cairo'}}},y:{ticks:{font:{size:9,family:'Cairo'}}}},plugins:{legend:{labels:{font:{size:10,family:'Cairo'},boxWidth:10}}}}
   });
 
-  // Projects by actual Status — horizontal bar chart
-  const ALL_STATUSES=['Analysis','Deployed','Development','Development Queued','In Pipeline','On Hold','Ready for Deployment','Testing'];
-  const ST_COLORS_MAP={Analysis:'#9b59b6',Deployed:'#27ae60',Development:'#e67e22','Development Queued':'#3498db','In Pipeline':'#95a5a6','On Hold':'#f39c12','Ready for Deployment':'#1abc9c',Testing:'#e74c3c'};
+  // Projects by actual Status — doughnut chart with website colour palette
+  const ALL_STATUSES=['Deployed','Development','Testing','Ready for Deployment','Development Queued','Analysis','On Hold','In Pipeline'];
+  const ST_COLORS_MAP={
+    'Deployed':'#27ae60',
+    'Development':'#782D55',
+    'Testing':'#E0AC92',
+    'Ready for Deployment':'#5C243F',
+    'Development Queued':'#8B556A',
+    'Analysis':'#A29475',
+    'On Hold':'#e67e22',
+    'In Pipeline':'#C1BBA8'
+  };
   const stCounts=ALL_STATUSES.map(st=>crs.filter(c=>c.projectStatus===st).length);
+  const nonZero=ALL_STATUSES.filter((_,i)=>stCounts[i]>0);
   const stTotal=crs.length||1;
   document.getElementById('ps-total-label').textContent=`Total: ${crs.length}`;
   if(statusDonutChart) statusDonutChart.destroy();
   statusDonutChart=new Chart(document.getElementById('statusDonut'),{
-    type:'bar',
+    type:'doughnut',
     data:{
       labels:ALL_STATUSES,
       datasets:[{
         data:stCounts,
         backgroundColor:ALL_STATUSES.map(s=>ST_COLORS_MAP[s]),
-        borderWidth:0,
+        borderWidth:2,borderColor:'#fff'
       }]
     },
     options:{
-      indexAxis:'y',
-      responsive:true,
-      maintainAspectRatio:false,
+      responsive:true,maintainAspectRatio:false,cutout:'55%',
       plugins:{
         legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x} CRs (${Math.round(ctx.parsed.x/stTotal*100)}%)`}}
-      },
-      scales:{
-        x:{ticks:{font:{size:9,family:'Cairo'}},beginAtZero:true},
-        y:{ticks:{font:{size:9,family:'Cairo'}}}
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} (${Math.round(ctx.parsed/stTotal*100)}%)`}}
       }
     }
   });
+  document.getElementById('status-legend').innerHTML=ALL_STATUSES.map((st,i)=>stCounts[i]>0?`<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px"><div style="width:9px;height:9px;border-radius:2px;background:${ST_COLORS_MAP[st]};flex-shrink:0"></div><span style="font-size:9px;flex:1">${st}</span><strong style="font-size:9px">${stCounts[i]}</strong><span style="font-size:8px;color:var(--muted);margin-left:2px">${Math.round(stCounts[i]/stTotal*100)}%</span></div>`:'').join('');
 
   // CR Phase Status detail table — replaces old classification × status stacked bars
   // Shows: per phase row → Done / In Progress / Pending counts + mini bar
