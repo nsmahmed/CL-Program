@@ -171,6 +171,10 @@ input[type=file]{display:none}
 .year-pill{padding:3px 12px;border-radius:14px;font-size:10px;font-weight:700;cursor:pointer;background:#fff;border:1px solid var(--border);color:var(--muted);font-family:'Cairo',sans-serif}
 .year-pill.active{background:var(--p2);color:#fff;border-color:var(--p2)}
 
+/* LEAVE CALENDAR */
+#leave-calendar td[onclick*="quickAddLeave"]:hover{filter:brightness(0.92);}
+#leave-calendar td[onclick*="deleteLeaveEntry"]:hover{filter:brightness(0.85);}
+
 /* SOW / FLAGS strip */
 .flag-strip{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 
@@ -322,6 +326,26 @@ input[type=file]{display:none}
 </style>
 </head>
 <body>
+
+<!-- ═══ PASSWORD GATE ═══ -->
+<div id="auth-gate" style="position:fixed;inset:0;background:var(--p3);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0">
+  <div style="background:#fff;border-radius:18px;padding:44px 40px 36px;text-align:center;max-width:360px;width:90%;box-shadow:0 24px 80px rgba(0,0,0,0.35)">
+    <div style="width:56px;height:56px;border-radius:50%;background:var(--p1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px">🔒</div>
+    <div style="font-size:18px;font-weight:800;color:var(--p3);margin-bottom:4px;font-family:'Cairo',sans-serif">PMO Dashboard</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:28px;font-family:'Cairo',sans-serif">Customs &amp; Logistics Sector</div>
+    <input type="password" id="auth-input" placeholder="Enter password"
+      style="width:100%;box-sizing:border-box;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'Cairo',sans-serif;margin-bottom:8px;outline:none;transition:border-color 0.2s"
+      onfocus="this.style.borderColor='var(--p1)'" onblur="this.style.borderColor='var(--border)'"
+      onkeydown="if(event.key==='Enter') checkAuth()">
+    <div id="auth-error" style="color:var(--risk);font-size:10px;margin-bottom:10px;height:14px;font-family:'Cairo',sans-serif"></div>
+    <button onclick="checkAuth()"
+      style="width:100%;padding:11px;background:var(--p1);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;letter-spacing:0.3px">
+      Enter Dashboard
+    </button>
+    <div style="font-size:9px;color:var(--muted);margin-top:20px;font-family:'Cairo',sans-serif">Malomatia · Customs &amp; Logistics Sector PMO</div>
+  </div>
+</div>
+
 <div class="shell">
 
 <!-- SIDEBAR -->
@@ -344,6 +368,7 @@ input[type=file]{display:none}
   <div class="nav-item" onclick="showPage('cr-list',this)">▪ CR List</div>
   <div class="nav-item" onclick="showPage('cr-cards',this)">▪ CR Cards</div>
   <div class="nav-item" onclick="showPage('allocation',this)">▪ Team Allocation</div>
+  <div class="nav-item" onclick="showPage('leave',this)">▪ Team Leave Calendar</div>
   <div class="nav-section">Data</div>
   <div class="nav-item" onclick="showPage('data-manager',this)">▪ CR Data Manager</div>
   <div class="nav-item" onclick="showPage('import',this)">▪ Import / Export</div>
@@ -453,6 +478,9 @@ input[type=file]{display:none}
 
 <!-- ═══════════════ RISKS & NOTES ═══════════════ -->
 <div id="page-risks" class="page">
+  <!-- Risk Summary at top -->
+  <div id="risk-summary-content" style="margin-bottom:12px"></div>
+
   <!-- Type filter bar + Add button -->
   <div style="display:flex;gap:6px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
     <div style="display:flex;gap:4px;flex-wrap:wrap">
@@ -466,7 +494,7 @@ input[type=file]{display:none}
   </div>
 
   <!-- Two columns: Program Projects | CRs -->
-  <div class="grid-2" style="margin-bottom:14px">
+  <div class="grid-2">
     <!-- Program Projects -->
     <div class="card">
       <div class="card-title">
@@ -489,12 +517,6 @@ input[type=file]{display:none}
         <button class="btn btn-outline" onclick="toggleNotes('cr')" style="font-size:10px;padding:4px 14px" id="notes-cr-btn">Show more</button>
       </div>
     </div>
-  </div>
-
-  <!-- Risk Summary (full width below) -->
-  <div class="card">
-    <div class="card-title"><div class="card-title-left">Risk Summary</div></div>
-    <div id="risk-summary-content"></div>
   </div>
 </div>
 
@@ -700,6 +722,34 @@ input[type=file]{display:none}
   </div>
 </div>
 
+<!-- ═══════════════ TEAM LEAVE CALENDAR ═══════════════ -->
+<div id="page-leave" class="page">
+  <!-- Controls row -->
+  <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <label style="font-size:10px;font-weight:600;color:var(--muted)">From</label>
+      <input type="month" id="leave-from" value="2025-05" class="filter-sel" style="width:130px">
+      <label style="font-size:10px;font-weight:600;color:var(--muted)">To</label>
+      <input type="month" id="leave-to" value="2026-01" class="filter-sel" style="width:130px">
+      <button class="btn btn-outline" onclick="renderLeave()" style="font-size:10px;padding:4px 14px">Apply</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-left:auto">
+      <button class="btn btn-outline" onclick="openManageLeaveMembers()" style="font-size:10px">Manage Members</button>
+      <button class="btn btn-primary" onclick="openAddLeave()">+ Add Leave</button>
+    </div>
+  </div>
+
+  <!-- Team color legend -->
+  <div id="leave-legend" style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap"></div>
+
+  <!-- Calendar card -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" id="leave-calendar-wrap">
+      <div id="leave-calendar" style="min-width:700px"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════ IMPORT ═══════════════ -->
 <div id="page-import" class="page">
   <!-- IMPORTANT: JSON Backup & Restore -->
@@ -893,7 +943,12 @@ input[type=file]{display:none}
       <option value="info">🔵 Note / Info</option>
     </select>
   </div>
-  <div class="form-row"><label>Related Project / CR</label><input type="text" id="n-proj" placeholder="Project name or CR ID"></div>
+  <div class="form-row"><label>Related Project / CR</label>
+    <div style="position:relative">
+      <input type="text" id="n-proj" placeholder="Search project or CR…" autocomplete="off" oninput="filterProjSearch(this.value)" style="width:100%;box-sizing:border-box">
+      <div id="n-proj-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:8px;max-height:230px;overflow-y:auto;z-index:200;box-shadow:0 6px 20px rgba(0,0,0,0.13);margin-top:3px"></div>
+    </div>
+  </div>
   <div class="form-row"><label>Description</label><textarea id="n-desc" style="height:80px" placeholder="Describe the risk, issue or note…"></textarea></div>
   <div class="form-grid">
     <div class="form-row"><label>Raised By</label><input type="text" id="n-by" placeholder="Name"></div>
@@ -902,6 +957,58 @@ input[type=file]{display:none}
   <div class="modal-footer">
     <button class="btn btn-outline" onclick="closeModal('add-note')">Cancel</button>
     <button class="btn btn-primary" onclick="saveNote()">Save</button>
+  </div>
+</div></div>
+
+<!-- Add Leave Entry -->
+<div class="modal-overlay" id="modal-add-leave">
+<div class="modal modal-sm">
+  <h3 id="al-modal-title">Add Leave Entry</h3>
+  <div class="form-grid">
+    <div class="form-row"><label>Team</label>
+      <select id="al-team" onchange="populateLeaveMemberSel()">
+        <option value="CSI">CSI Team</option>
+        <option value="QA">QA Team</option>
+        <option value="BI">BI &amp; Analytics / AI</option>
+        <option value="TT">TT Team</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Team Member</label>
+      <select id="al-member"></select>
+    </div>
+    <div class="form-row"><label>From</label><input type="date" id="al-from"></div>
+    <div class="form-row"><label>To</label><input type="date" id="al-to"></div>
+  </div>
+  <div class="form-row"><label>Note (optional)</label><input type="text" id="al-note" placeholder="Annual leave, sick leave…"></div>
+  <input type="hidden" id="al-edit-id">
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('add-leave')">Cancel</button>
+    <button class="btn btn-primary" onclick="saveLeaveEntry()">Save</button>
+  </div>
+</div></div>
+
+<!-- Manage Leave Members -->
+<div class="modal-overlay" id="modal-manage-leave">
+<div class="modal" style="width:520px;max-height:80vh;display:flex;flex-direction:column">
+  <h3>Manage Team Members</h3>
+  <div class="form-grid" style="margin-bottom:12px">
+    <div class="form-row"><label>Team</label>
+      <select id="mm-team">
+        <option value="CSI">CSI Team</option>
+        <option value="QA">QA Team</option>
+        <option value="BI">BI &amp; Analytics / AI</option>
+        <option value="TT">TT Team</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Name</label><input type="text" id="mm-name" placeholder="Full name"></div>
+    <div class="form-row"><label>Backup Person</label><input type="text" id="mm-backup" placeholder="Who covers them"></div>
+    <div class="form-row" style="display:flex;align-items:flex-end">
+      <button class="btn btn-primary" onclick="addLeaveMember()" style="width:100%;margin-top:auto">+ Add Member</button>
+    </div>
+  </div>
+  <div style="overflow-y:auto;flex:1;border-top:1px solid var(--border);padding-top:10px" id="mm-members-list"></div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('manage-leave')">Close</button>
   </div>
 </div></div>
 
@@ -1224,14 +1331,65 @@ let notes = [
   {type:'info',proj:'CR250008',desc:'Hssify AI HS Code Classification is 40% through dev (due 31-Jul-26). Vendor confirmed timeline is on track. Marketing material draft already in progress.',by:'PMO',date:'2026-06-01'},
 ];
 
+// ═══════════════ LEAVE CALENDAR DATA ═══════════════
+const LEAVE_TEAMS=[
+  {key:'CSI', label:'CSI Team',           color:'#27ae60', light:'#e8f5e9'},
+  {key:'QA',  label:'QA Team',            color:'#8e44ad', light:'#f3e5f5'},
+  {key:'BI',  label:'BI & Analytics / AI',color:'#2471a3', light:'#e3f2fd'},
+  {key:'TT',  label:'TT Team',            color:'#c0392b', light:'#fdf0ef'},
+];
+
+let leaveMembers=[
+  {team:'CSI',name:'El Zaharna',     backup:''},
+  {team:'CSI',name:'Ali Elameen',    backup:'Noor Elsaqa'},
+  {team:'CSI',name:'Noor Elsaqa',    backup:'Ali Elameen'},
+  {team:'CSI',name:'Abdel Rahman',   backup:''},
+  {team:'CSI',name:'Menna',          backup:''},
+  {team:'CSI',name:'Khalid',         backup:''},
+  {team:'QA', name:'Ragep',          backup:'Mohammed Majed'},
+  {team:'QA', name:'Abu-Sukhon',     backup:'Ragep'},
+  {team:'QA', name:'Rani',           backup:'Ragep & Mohammed Majed'},
+  {team:'BI', name:'Mohammad Al Wakil',backup:'Ahmad Ikhlaif'},
+  {team:'BI', name:'Ahmad Ikhlaif',  backup:'Mohammad Al Wakil'},
+  {team:'BI', name:'Hazim',          backup:'Ahmad Ikhlaif & Tarteel'},
+  {team:'BI', name:'Tarteel',        backup:''},
+  {team:'BI', name:'Noor Khial',     backup:''},
+  {team:'TT', name:'Zameer',         backup:''},
+  {team:'TT', name:'Akram',          backup:'Zameer'},
+  {team:'TT', name:'Ajit',           backup:'Ravi & Rohit'},
+  {team:'TT', name:'Diwakara',       backup:'Siva Reddy / Praveen'},
+];
+
+let leaveEntries=[
+  {id:'L1', team:'CSI',member:'El Zaharna',     from:'2025-06-08',to:'2025-06-08',note:''},
+  {id:'L2', team:'CSI',member:'Ali Elameen',    from:'2025-07-06',to:'2025-07-17',note:'Annual leave'},
+  {id:'L3', team:'CSI',member:'Noor Elsaqa',    from:'2025-08-03',to:'2025-08-21',note:'Annual leave'},
+  {id:'L4', team:'CSI',member:'Ali Elameen',    from:'2025-12-01',to:'2025-12-14',note:'Annual leave'},
+  {id:'L5', team:'CSI',member:'Noor Elsaqa',    from:'2025-12-21',to:'2025-12-25',note:'Annual leave'},
+  {id:'L6', team:'QA', member:'Ragep',          from:'2025-06-15',to:'2025-07-10',note:'Annual leave'},
+  {id:'L7', team:'QA', member:'Abu-Sukhon',     from:'2025-07-27',to:'2025-08-21',note:'Annual leave'},
+  {id:'L8', team:'QA', member:'Rani',           from:'2025-06-25',to:'2025-07-19',note:'Annual leave'},
+  {id:'L9', team:'BI', member:'Mohammad Al Wakil',from:'2025-07-25',to:'2025-08-25',note:'Annual leave'},
+  {id:'L10',team:'BI', member:'Ahmad Ikhlaif',  from:'2025-07-06',to:'2025-07-10',note:'Annual leave'},
+  {id:'L11',team:'BI', member:'Ahmad Ikhlaif',  from:'2025-09-14',to:'2025-09-18',note:'Annual leave'},
+  {id:'L12',team:'BI', member:'Hazim',          from:'2025-06-03',to:'2025-07-01',note:'Annual leave'},
+  {id:'L13',team:'TT', member:'Zameer',         from:'2025-10-01',to:'2025-10-05',note:'Annual leave'},
+  {id:'L14',team:'TT', member:'Akram',          from:'2025-06-15',to:'2025-07-03',note:'Annual leave'},
+  {id:'L15',team:'TT', member:'Ajit',           from:'2025-06-08',to:'2025-06-20',note:'Annual leave'},
+  {id:'L16',team:'TT', member:'Ajit',           from:'2025-08-10',to:'2025-08-21',note:'Annual leave'},
+  {id:'L17',team:'TT', member:'Diwakara',       from:'2025-07-06',to:'2025-07-24',note:'Annual leave'},
+];
+
 // ═══════════════ PERSISTENCE (localStorage) ═══════════════
-const LS = {crs:'cl_alnadeeb_crs_v2',proj:'cl_alnadeeb_proj_v2',notes:'cl_alnadeeb_notes_v2',ts:'cl_alnadeeb_ts_v2'};
+const LS = {crs:'cl_alnadeeb_crs_v2',proj:'cl_alnadeeb_proj_v2',notes:'cl_alnadeeb_notes_v2',ts:'cl_alnadeeb_ts_v2',leave:'cl_leave_v1',leaveM:'cl_leave_mbr_v1'};
 
 function saveData(){
   try{
     localStorage.setItem(LS.crs,JSON.stringify(crProjects));
     localStorage.setItem(LS.proj,JSON.stringify(sectorProjects));
     localStorage.setItem(LS.notes,JSON.stringify(notes));
+    localStorage.setItem(LS.leave,JSON.stringify(leaveEntries));
+    localStorage.setItem(LS.leaveM,JSON.stringify(leaveMembers));
     const ts=new Date().toISOString();
     localStorage.setItem(LS.ts,ts);
     showSaveBadge('saved','Saved '+ts.slice(11,16)+' UTC');
@@ -1247,6 +1405,10 @@ function loadData(){
     if(sp) sectorProjects=JSON.parse(sp);
     const sn=localStorage.getItem(LS.notes);
     if(sn) notes=JSON.parse(sn);
+    const sl=localStorage.getItem(LS.leave);
+    if(sl) leaveEntries=JSON.parse(sl);
+    const sm=localStorage.getItem(LS.leaveM);
+    if(sm) leaveMembers=JSON.parse(sm);
     const ts=localStorage.getItem(LS.ts);
     if(ts) showSaveBadge('saved','Last saved '+ts.slice(0,10)+' '+ts.slice(11,16));
   }catch(e){console.warn('loadData error',e);}
@@ -1279,9 +1441,9 @@ function showPage(id,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if(el) el.classList.add('active');
-  const titles={overview:'Sector Overview','cr-overview':'CR Dashboard (Alnadeeb)','cr-list':'CR Project List','cr-cards':'CR Cards',projects:'Program Projects',timeline:'Project Timeline / Gantt',risks:'Risks, Issues & Notes',allocation:'Team Allocation','data-manager':'CR Data Manager',import:'Import / Export Data'};
+  const titles={overview:'Sector Overview','cr-overview':'CR Dashboard (Alnadeeb)','cr-list':'CR Project List','cr-cards':'CR Cards',projects:'Program Projects',timeline:'Project Timeline / Gantt',risks:'Risks, Issues & Notes',allocation:'Team Allocation',leave:'Team Leave Calendar','data-manager':'CR Data Manager',import:'Import / Export Data'};
   document.getElementById('page-title').textContent=titles[id]||id;
-  const renderers={overview:renderOverview,projects:renderProjects,timeline:renderTimeline,risks:renderNotes,'cr-overview':renderCROverview,'cr-list':renderCRListTable,'cr-cards':renderCRList,allocation:renderAllocation,'data-manager':renderDataManager};
+  const renderers={overview:renderOverview,projects:renderProjects,timeline:renderTimeline,risks:renderNotes,'cr-overview':renderCROverview,'cr-list':renderCRListTable,'cr-cards':renderCRList,allocation:renderAllocation,leave:renderLeave,'data-manager':renderDataManager};
   if(renderers[id]) renderers[id]();
 }
 
@@ -1621,13 +1783,29 @@ function renderNotes(){
   const approval=notes.filter(n=>n.type==='approval').length;
   const info=notes.filter(n=>n.type==='info').length;
   document.getElementById('risk-summary-content').innerHTML=`
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
-      <div style="background:#fff5f5;border-radius:8px;padding:14px;text-align:center;border:1px solid #ffd0d0"><div style="font-size:22px;font-weight:800;color:var(--risk)">${risk}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Risks</div></div>
-      <div style="background:#fff8e1;border-radius:8px;padding:14px;text-align:center;border:1px solid #ffe082"><div style="font-size:22px;font-weight:800;color:var(--warn)">${issue}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Issues</div></div>
-      <div style="background:#e8f5e9;border-radius:8px;padding:14px;text-align:center;border:1px solid #a5d6a7"><div style="font-size:22px;font-weight:800;color:var(--ok)">${approval}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Needs Approval</div></div>
-      <div style="background:#f5f5f5;border-radius:8px;padding:14px;text-align:center;border:1px solid #e0e0e0"><div style="font-size:22px;font-weight:800;color:var(--info)">${info}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Notes</div></div>
-    </div>
-    <div style="margin-top:10px;font-size:10px;color:var(--muted);font-style:italic">${notes.length} total — ${progNotes.length} program / ${crNotes.length} CR (matching current filter).</div>`;
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:stretch">
+      <div style="background:#fff5f5;border-radius:10px;padding:10px 22px;border:1px solid #ffd0d0;display:flex;align-items:center;gap:12px;flex:1;min-width:110px">
+        <div style="font-size:28px;font-weight:800;color:var(--risk);line-height:1">${risk}</div>
+        <div><div style="font-size:10px;font-weight:700;color:var(--risk)">Risks</div><div style="font-size:8px;color:var(--muted)">Open</div></div>
+      </div>
+      <div style="background:#fff8e1;border-radius:10px;padding:10px 22px;border:1px solid #ffe082;display:flex;align-items:center;gap:12px;flex:1;min-width:110px">
+        <div style="font-size:28px;font-weight:800;color:var(--warn);line-height:1">${issue}</div>
+        <div><div style="font-size:10px;font-weight:700;color:var(--warn)">Issues</div><div style="font-size:8px;color:var(--muted)">Active</div></div>
+      </div>
+      <div style="background:#e8f5e9;border-radius:10px;padding:10px 22px;border:1px solid #a5d6a7;display:flex;align-items:center;gap:12px;flex:1;min-width:110px">
+        <div style="font-size:28px;font-weight:800;color:var(--ok);line-height:1">${approval}</div>
+        <div><div style="font-size:10px;font-weight:700;color:var(--ok)">Needs Approval</div><div style="font-size:8px;color:var(--muted)">Pending</div></div>
+      </div>
+      <div style="background:#eef4fb;border-radius:10px;padding:10px 22px;border:1px solid #aacfee;display:flex;align-items:center;gap:12px;flex:1;min-width:110px">
+        <div style="font-size:28px;font-weight:800;color:#2471a3;line-height:1">${info}</div>
+        <div><div style="font-size:10px;font-weight:700;color:#2471a3">Notes</div><div style="font-size:8px;color:var(--muted)">Info</div></div>
+      </div>
+      <div style="border-radius:10px;padding:10px 16px;border:1px solid var(--border);background:#faf7f3;display:flex;flex-direction:column;justify-content:center;min-width:140px">
+        <div style="font-size:18px;font-weight:800;color:var(--p3)">${notes.length}</div>
+        <div style="font-size:9px;color:var(--muted)">Total entries</div>
+        <div style="font-size:8px;color:var(--muted);margin-top:2px">${progNotes.length} prog · ${crNotes.length} CR shown</div>
+      </div>
+    </div>`;
 }
 
 function toggleNotes(sec){
@@ -2058,39 +2236,66 @@ function showAllocTab(tab,el){
   el.classList.add('active');
 }
 
-function allocPieChart(canvasId,legendId,memberMap,chartRef,colorBase){
+// sharedMap: {memberName: count of CRs that member shares with at least one other person}
+function allocPieChart(canvasId,legendId,memberMap,chartRef,colorBase,sharedMap,uniqueCRCount){
   const ctx=document.getElementById(canvasId);if(!ctx) return null;
   if(chartRef) chartRef.destroy();
   const members=Object.keys(memberMap).filter(m=>m&&m!=='TBD'&&m!=='—');
   if(!members.length){ctx.parentElement.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">No member data in CR list yet</div>';return null;}
   const palette=['#782D55','#8B556A','#A29475','#5C243F','#C1BBA8','#E0AC92','#9b59b6','#3498db','#27ae60','#e67e22'];
+  const sm=sharedMap||{};
+  const totalAssignments=members.reduce((s,m)=>s+memberMap[m],0);
   const chart=new Chart(ctx,{
     type:'doughnut',
     data:{
       labels:members,
       datasets:[{data:members.map(m=>memberMap[m]),backgroundColor:members.map((_,i)=>palette[i%palette.length]),borderWidth:2,borderColor:'#fff'}]
     },
-    options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} CRs`}}}}
+    options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{
+      const m=c.label; const shared=sm[m]||0;
+      return shared?`${m}: ${c.parsed} CR${c.parsed!==1?'s':''} (${shared} shared)`:`${m}: ${c.parsed} CR${c.parsed!==1?'s':''}`;
+    }}}}}
   });
-  document.getElementById(legendId).innerHTML=members.map((m,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div style="width:9px;height:9px;border-radius:2px;background:${palette[i%palette.length]};flex-shrink:0"></div><span style="font-size:10px">${m}: <strong>${memberMap[m]}</strong></span></div>`).join('');
+  // Legend: name + count + shared badge
+  const legendRows=members.map((m,i)=>{
+    const shared=sm[m]||0;
+    const sharedBadge=shared?`<span style="font-size:8px;background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:4px;padding:0px 4px;margin-left:3px">${shared} shared</span>`:'';
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <div style="width:9px;height:9px;border-radius:2px;background:${palette[i%palette.length]};flex-shrink:0"></div>
+      <span style="font-size:10px;flex:1">${m}: <strong>${memberMap[m]}</strong>${sharedBadge}</span>
+    </div>`;
+  }).join('');
+  // Footer: unique CR count vs total assignments
+  const sharedNote=(uniqueCRCount!==undefined&&totalAssignments!==uniqueCRCount)
+    ?`<div style="margin-top:7px;padding-top:6px;border-top:1px solid #f0ede8;font-size:9px;color:var(--muted)">${uniqueCRCount} unique CRs · ${totalAssignments} total assignments<br><span style="color:#e65100">${totalAssignments-uniqueCRCount} assignment${totalAssignments-uniqueCRCount!==1?'s':''} shared across multiple members</span></div>`
+    :`<div style="margin-top:7px;padding-top:6px;border-top:1px solid #f0ede8;font-size:9px;color:var(--muted)">${totalAssignments} CR assignment${totalAssignments!==1?'s':''} · ${members.length} member${members.length!==1?'s':''}</div>`;
+  document.getElementById(legendId).innerHTML=legendRows+sharedNote;
   return chart;
 }
 
 function renderAllocation(){
   const stBadge=s=>s?`<span class="badge ${s.toLowerCase()==='done'?'badge-green':s.toLowerCase().includes('progress')||s.toLowerCase()==='testing'?'badge-blue':s.toLowerCase().includes('hold')?'badge-amber':'badge-gray'}">${s}</span>`:'<span class="badge badge-gray">—</span>';
+  // shared CR row indicator
+  const sharedBadge=`<span title="Shared: multiple people assigned" style="font-size:8px;background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:4px;padding:1px 5px;margin-left:4px">shared</span>`;
   const statusFilter=document.getElementById('alloc-status-filter')?.value||'';
   const crList=statusFilter?crProjects.filter(c=>c.projectStatus===statusFilter):crProjects;
 
   // ── CSI ──
-  const csiMap={};
+  const csiMap={};const csiShared={};let csiUnique=0;
   let csiHtml='';
   crList.forEach(cr=>{
     if(!cr.ba) return;
-    cr.ba.split(',').map(m=>m.trim()).filter(Boolean).forEach(m=>{csiMap[m]=(csiMap[m]||0)+1;});
-    csiHtml+=`<tr>
+    const mems=cr.ba.split(',').map(m=>m.trim()).filter(Boolean);
+    const isShared=mems.length>1;
+    csiUnique++;
+    mems.forEach(m=>{
+      csiMap[m]=(csiMap[m]||0)+1;
+      if(isShared) csiShared[m]=(csiShared[m]||0)+1;
+    });
+    csiHtml+=`<tr${isShared?' style="background:#fff8f0"':''}>
       <td style="font-size:10px;font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
       <td style="font-size:10px;max-width:180px;white-space:normal;line-height:1.3">${cr.name}</td>
-      <td style="font-size:10px;font-weight:600;color:#880e4f">${cr.ba||'—'}</td>
+      <td style="font-size:10px;font-weight:600;color:#880e4f">${cr.ba||'—'}${isShared?sharedBadge:''}</td>
       <td>${stBadge(cr.brdStatus)}</td>
       <td style="font-size:10px;color:var(--muted)">${cr.brdDue||'—'}</td>
       <td>${stBadge(cr.projectStatus)}</td>
@@ -2098,17 +2303,23 @@ function renderAllocation(){
     </tr>`;
   });
   document.getElementById('alloc-csi-body').innerHTML=csiHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">${statusFilter?'No CRs with status "'+statusFilter+'"':'No data'}</td></tr>`;
-  csiAllocChart=allocPieChart('csi-alloc-chart','csi-alloc-legend',csiMap,csiAllocChart,'#880e4f');
+  csiAllocChart=allocPieChart('csi-alloc-chart','csi-alloc-legend',csiMap,csiAllocChart,'#880e4f',csiShared,csiUnique);
 
   // ── TT ──
-  const ttMap={};
+  const ttMap={};const ttShared={};let ttUnique=0;
   let ttHtml='';
   crList.filter(cr=>cr.ttMembers||cr.devStatus).forEach(cr=>{
-    if(cr.ttMembers) cr.ttMembers.split(',').map(m=>m.trim()).filter(Boolean).forEach(m=>{ttMap[m]=(ttMap[m]||0)+1;});
-    ttHtml+=`<tr>
+    const mems=(cr.ttMembers||'').split(',').map(m=>m.trim()).filter(Boolean);
+    const isShared=mems.length>1;
+    if(mems.length) ttUnique++;
+    mems.forEach(m=>{
+      ttMap[m]=(ttMap[m]||0)+1;
+      if(isShared) ttShared[m]=(ttShared[m]||0)+1;
+    });
+    ttHtml+=`<tr${isShared?' style="background:#fff8f0"':''}>
       <td style="font-size:10px;font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
       <td style="font-size:10px;max-width:160px;white-space:normal;line-height:1.3">${cr.name}</td>
-      <td style="font-size:9px;color:#1a237e;max-width:140px;white-space:normal;line-height:1.3">${cr.ttMembers||'—'}</td>
+      <td style="font-size:9px;color:#1a237e;max-width:140px;white-space:normal;line-height:1.3">${cr.ttMembers||'—'}${isShared?sharedBadge:''}</td>
       <td>${stBadge(cr.devStatus)}</td>
       <td style="font-size:10px;color:var(--muted)">${cr.devDue||'—'}</td>
       <td>${stBadge(cr.deploymentStatus)}</td>
@@ -2116,17 +2327,23 @@ function renderAllocation(){
     </tr>`;
   });
   document.getElementById('alloc-tt-body').innerHTML=ttHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">${statusFilter?'No CRs with status "'+statusFilter+'"':'No data'}</td></tr>`;
-  ttAllocChart=allocPieChart('tt-alloc-chart','tt-alloc-legend',ttMap,ttAllocChart,'#1a237e');
+  ttAllocChart=allocPieChart('tt-alloc-chart','tt-alloc-legend',ttMap,ttAllocChart,'#1a237e',ttShared,ttUnique);
 
   // ── QA ──
-  const qaMap={};
+  const qaMap={};const qaShared={};let qaUnique=0;
   let qaHtml='';
   crList.filter(cr=>cr.qaMember||cr.internalTestStatus||cr.uatStatus).forEach(cr=>{
-    if(cr.qaMember) cr.qaMember.split(',').map(m=>m.trim()).filter(Boolean).forEach(m=>{qaMap[m]=(qaMap[m]||0)+1;});
-    qaHtml+=`<tr>
+    const mems=(cr.qaMember||'').split(',').map(m=>m.trim()).filter(Boolean);
+    const isShared=mems.length>1;
+    if(mems.length) qaUnique++;
+    mems.forEach(m=>{
+      qaMap[m]=(qaMap[m]||0)+1;
+      if(isShared) qaShared[m]=(qaShared[m]||0)+1;
+    });
+    qaHtml+=`<tr${isShared?' style="background:#fff8f0"':''}>
       <td style="font-size:10px;font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
       <td style="font-size:10px;max-width:160px;white-space:normal;line-height:1.3">${cr.name}</td>
-      <td style="font-size:10px;font-weight:600;color:#004d40">${cr.qaMember||'—'}</td>
+      <td style="font-size:10px;font-weight:600;color:#004d40">${cr.qaMember||'—'}${isShared?sharedBadge:''}</td>
       <td>${stBadge(cr.internalTestStatus)}</td>
       <td>${stBadge(cr.uatStatus)}</td>
       <td style="font-size:10px;color:var(--muted)">${cr.uatDue||'—'}</td>
@@ -2134,7 +2351,7 @@ function renderAllocation(){
     </tr>`;
   });
   document.getElementById('alloc-qa-body').innerHTML=qaHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">${statusFilter?'No CRs with status "'+statusFilter+'"':'No data'}</td></tr>`;
-  qaAllocChart=allocPieChart('qa-alloc-chart','qa-alloc-legend',qaMap,qaAllocChart,'#004d40');
+  qaAllocChart=allocPieChart('qa-alloc-chart','qa-alloc-legend',qaMap,qaAllocChart,'#004d40',qaShared,qaUnique);
 }
 
 // ═══════════════ MODALS ═══════════════
@@ -2270,10 +2487,259 @@ function editProject(id){
   openModal('add-project');
 }
 
+// ── searchable project/CR picker for Add Risk/Note modal ──
+function filterProjSearch(q){
+  const dd=document.getElementById('n-proj-dd');
+  if(!dd) return;
+  if(!q||q.length<1){dd.style.display='none';return;}
+  const ql=q.toLowerCase();
+  const pm=sectorProjects.filter(p=>p.name.toLowerCase().includes(ql));
+  const cm=crProjects.filter(c=>c.name.toLowerCase().includes(ql)||(c.id||'').toLowerCase().includes(ql)).slice(0,12);
+  let html='';
+  if(pm.length){
+    html+=`<div style="font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;padding:6px 10px 2px;background:#fafaf8;border-bottom:1px solid #f0ede8">Program Projects</div>`;
+    pm.forEach(p=>{
+      const sc={Completed:'#27ae60','At Risk':'#e67e22',Delayed:'#c0392b','On Track':'#2471a3'}[p.status]||'#888';
+      html+=`<div style="padding:8px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f5f0eb" onmousedown="selectProjSearch('${p.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
+        <span style="flex:1;font-weight:600;color:var(--p3)">${p.name}</span>
+        <span style="font-size:8px;font-weight:700;color:${sc};background:${sc}22;padding:1px 7px;border-radius:8px">${p.status}</span>
+      </div>`;
+    });
+  }
+  if(cm.length){
+    html+=`<div style="font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;padding:6px 10px 2px;background:#fafaf8;border-bottom:1px solid #f0ede8">Change Requests</div>`;
+    cm.forEach(c=>{
+      html+=`<div style="padding:8px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f5f0eb" onmousedown="selectProjSearch('${c.id.replace(/'/g,"\\'")}')">
+        <span style="font-size:9px;font-weight:800;color:var(--p1);flex-shrink:0">${c.id}</span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#555">${c.name}</span>
+      </div>`;
+    });
+  }
+  if(!html){dd.style.display='none';return;}
+  dd.innerHTML=html;
+  dd.style.display='block';
+}
+function selectProjSearch(val){
+  const inp=document.getElementById('n-proj');
+  if(inp) inp.value=val;
+  const dd=document.getElementById('n-proj-dd');
+  if(dd) dd.style.display='none';
+}
+document.addEventListener('click',e=>{
+  const dd=document.getElementById('n-proj-dd');
+  const inp=document.getElementById('n-proj');
+  if(dd&&inp&&!inp.contains(e.target)&&!dd.contains(e.target)) dd.style.display='none';
+});
+
 function saveNote(){
   notes.push({type:document.getElementById('n-type').value,proj:document.getElementById('n-proj').value||'General',desc:document.getElementById('n-desc').value||'',by:document.getElementById('n-by').value||'Unknown',date:document.getElementById('n-date').value||TODAY.toISOString().slice(0,10)});
   closeModal('add-note');saveData();
   if(document.getElementById('page-risks').classList.contains('active')) renderNotes();
+}
+
+// ═══════════════ LEAVE CALENDAR ═══════════════
+const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function renderLeave(){
+  // Legend
+  const legendEl=document.getElementById('leave-legend');
+  if(legendEl) legendEl.innerHTML=LEAVE_TEAMS.map(t=>`
+    <div style="display:flex;align-items:center;gap:7px">
+      <div style="width:14px;height:14px;border-radius:3px;background:${t.color};flex-shrink:0"></div>
+      <span style="font-size:10px;font-weight:600;color:var(--p3)">${t.label}</span>
+    </div>`).join('')+`
+    <div style="display:flex;align-items:center;gap:7px;margin-left:10px">
+      <div style="width:14px;height:14px;border:2px solid var(--risk);border-radius:3px;flex-shrink:0"></div>
+      <span style="font-size:10px;color:var(--muted)">Current week</span>
+    </div>`;
+
+  const fromRaw=document.getElementById('leave-from')?.value||'2025-05';
+  const toRaw=document.getElementById('leave-to')?.value||'2026-01';
+  const [fromY,fromM]=fromRaw.split('-').map(Number);
+  const [toY,toM]=toRaw.split('-').map(Number);
+
+  // Start from first Sunday of or before first day of from-month
+  let startDate=new Date(fromY,fromM-1,1);
+  startDate.setDate(startDate.getDate()-startDate.getDay()); // go to Sunday
+
+  const endDate=new Date(toY,toM,0); // last day of to-month
+
+  // Generate weeks (Sunday-start)
+  const weeks=[];
+  let cur=new Date(startDate);
+  while(cur<=endDate){
+    weeks.push(new Date(cur));
+    cur=new Date(cur.getTime()+7*86400000);
+  }
+
+  const todayStr=TODAY.toISOString().slice(0,10);
+
+  // Month header groups
+  const monthGroups=[];
+  weeks.forEach((w,i)=>{
+    const mo=w.getMonth(),yr=w.getFullYear();
+    if(!monthGroups.length||monthGroups[monthGroups.length-1].month!==mo||monthGroups[monthGroups.length-1].year!==yr)
+      monthGroups.push({month:mo,year:yr,count:1});
+    else monthGroups[monthGroups.length-1].count++;
+  });
+
+  // Build table
+  let html=`<table style="border-collapse:collapse;white-space:nowrap;width:100%">`;
+
+  // Row 1: Month headers
+  html+=`<thead><tr>
+    <th style="position:sticky;left:0;z-index:4;background:var(--p3);color:#fff;font-size:9px;font-weight:700;text-align:left;padding:7px 12px;min-width:145px;letter-spacing:0.3px;top:0">Member</th>`;
+  monthGroups.forEach(mg=>{
+    const yr=mg.year!==fromY?` '${String(mg.year).slice(2)}`:'';
+    html+=`<th colspan="${mg.count}" style="position:sticky;top:0;background:var(--p3);color:#fff;text-align:center;font-size:10px;font-weight:700;padding:6px 4px;border-left:2px solid rgba(255,255,255,0.25)">${MONTH_NAMES[mg.month]}${yr}</th>`;
+  });
+  html+=`<th style="position:sticky;right:0;z-index:4;background:var(--p3);color:#fff;font-size:9px;font-weight:700;padding:7px 10px;min-width:140px;top:0">Backup Person</th></tr>`;
+
+  // Row 2: Week day numbers
+  html+=`<tr><th style="position:sticky;left:0;z-index:3;background:var(--p2);color:#fff;font-size:8px;padding:3px 12px"></th>`;
+  weeks.forEach(w=>{
+    const wEnd=new Date(w.getTime()+6*86400000);
+    const wStr=w.toISOString().slice(0,10);
+    const wEndStr=wEnd.toISOString().slice(0,10);
+    const isNow=todayStr>=wStr&&todayStr<=wEndStr;
+    html+=`<th style="background:${isNow?'var(--risk)':'var(--p2)'};color:#fff;text-align:center;font-size:9px;font-weight:700;padding:3px 2px;min-width:30px;border-left:1px solid rgba(255,255,255,0.18);position:sticky;z-index:2;top:26px">${w.getDate()}</th>`;
+  });
+  html+=`<th style="position:sticky;right:0;z-index:3;background:var(--p2);color:#fff;font-size:8px;padding:3px 10px;top:26px"></th></tr></thead><tbody>`;
+
+  // Team rows
+  LEAVE_TEAMS.forEach(team=>{
+    const members=leaveMembers.filter(m=>m.team===team.key);
+    html+=`<tr><td colspan="${weeks.length+2}" style="background:${team.color};color:#fff;font-size:10px;font-weight:800;padding:5px 12px;letter-spacing:0.5px">${team.label}</td></tr>`;
+    members.forEach((member,mi)=>{
+      const rowBg=mi%2===0?'#ffffff':'#fdf9f6';
+      const memberLeaves=leaveEntries.filter(e=>e.team===team.key&&e.member===member.name);
+      html+=`<tr><td style="position:sticky;left:0;z-index:2;background:${rowBg};font-size:10px;font-weight:600;color:var(--p3);padding:5px 10px;border-right:2px solid var(--border);min-width:145px;max-width:145px;overflow:hidden;text-overflow:ellipsis">${member.name}</td>`;
+      weeks.forEach(w=>{
+        const wStart=w.toISOString().slice(0,10);
+        const wEndDate=new Date(w.getTime()+6*86400000);
+        const wEnd=wEndDate.toISOString().slice(0,10);
+        const isNow=todayStr>=wStart&&todayStr<=wEnd;
+        const leave=memberLeaves.find(e=>e.from<=wEnd&&e.to>=wStart);
+        if(leave){
+          const isStart=leave.from>=wStart&&leave.from<=wEnd;
+          const isEnd=leave.to>=wStart&&leave.to<=wEnd;
+          const label=isStart?new Date(leave.from+'T12:00:00').getDate():(isEnd?new Date(leave.to+'T12:00:00').getDate():'');
+          const outline=isNow?';outline:2px solid var(--risk);outline-offset:-2px':'';
+          html+=`<td style="background:${team.color};color:rgba(255,255,255,0.95);text-align:center;font-size:8px;font-weight:700;height:26px;border:1px solid rgba(255,255,255,0.2)${outline};cursor:pointer" title="${leave.from} → ${leave.to}${leave.note?' | '+leave.note:''}" onclick="deleteLeaveEntry('${leave.id}',event)">${label}</td>`;
+        } else {
+          html+=`<td style="background:${isNow?'rgba(192,57,43,0.07)':rowBg};height:26px;border:1px solid #f0ede8;cursor:pointer" title="Click to add leave for ${member.name}" onclick="quickAddLeave('${team.key}','${member.name.replace(/'/g,"\\'")}','${wStart}')"></td>`;
+        }
+      });
+      html+=`<td style="position:sticky;right:0;z-index:2;background:${rowBg};font-size:9px;color:var(--muted);padding:5px 10px;border-left:2px solid var(--border);min-width:140px">${member.backup||'—'}</td></tr>`;
+    });
+  });
+
+  html+=`</tbody></table>`;
+  document.getElementById('leave-calendar').innerHTML=html;
+}
+
+function openAddLeave(){
+  document.getElementById('al-modal-title').textContent='Add Leave Entry';
+  document.getElementById('al-edit-id').value='';
+  document.getElementById('al-team').value='CSI';
+  populateLeaveMemberSel();
+  document.getElementById('al-from').value='';
+  document.getElementById('al-to').value='';
+  document.getElementById('al-note').value='';
+  openModal('add-leave');
+}
+
+function quickAddLeave(teamKey,memberName,dateStr){
+  document.getElementById('al-modal-title').textContent='Add Leave Entry';
+  document.getElementById('al-edit-id').value='';
+  document.getElementById('al-team').value=teamKey;
+  populateLeaveMemberSel();
+  document.getElementById('al-member').value=memberName;
+  document.getElementById('al-from').value=dateStr;
+  document.getElementById('al-to').value=dateStr;
+  document.getElementById('al-note').value='Annual leave';
+  openModal('add-leave');
+}
+
+function populateLeaveMemberSel(){
+  const team=document.getElementById('al-team')?.value||'CSI';
+  const sel=document.getElementById('al-member');
+  if(!sel) return;
+  sel.innerHTML=leaveMembers.filter(m=>m.team===team).map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+}
+
+function saveLeaveEntry(){
+  const editId=document.getElementById('al-edit-id').value;
+  const entry={
+    id:editId||('L'+Date.now()),
+    team:document.getElementById('al-team').value,
+    member:document.getElementById('al-member').value,
+    from:document.getElementById('al-from').value,
+    to:document.getElementById('al-to').value,
+    note:document.getElementById('al-note').value,
+  };
+  if(!entry.from||!entry.to||!entry.member){alert('Please fill in all required fields.');return;}
+  if(entry.from>entry.to){alert('From date must be before To date.');return;}
+  if(editId){const idx=leaveEntries.findIndex(e=>e.id===editId);if(idx>=0) leaveEntries[idx]=entry;}
+  else leaveEntries.push(entry);
+  saveData();
+  closeModal('add-leave');
+  renderLeave();
+}
+
+function deleteLeaveEntry(id,evt){
+  evt.stopPropagation();
+  if(!confirm('Remove this leave entry?')) return;
+  leaveEntries=leaveEntries.filter(le=>le.id!==id);
+  saveData();
+  renderLeave();
+}
+
+function openManageLeaveMembers(){
+  renderMembersList();
+  openModal('manage-leave');
+}
+
+function renderMembersList(){
+  const listEl=document.getElementById('mm-members-list');
+  if(!listEl) return;
+  let html='';
+  LEAVE_TEAMS.forEach(team=>{
+    const members=leaveMembers.filter(m=>m.team===team.key);
+    html+=`<div style="font-size:9px;font-weight:800;color:${team.color};text-transform:uppercase;letter-spacing:0.5px;padding:8px 0 4px;border-top:1px solid #f0ede8;margin-top:6px">${team.label}</div>`;
+    if(!members.length){html+=`<div style="font-size:10px;color:var(--muted);padding:3px 0">No members yet.</div>`;return;}
+    members.forEach(m=>{
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f8f4ef">
+        <span style="flex:1;font-size:10px;font-weight:600;color:var(--p3)">${m.name}</span>
+        ${m.backup?`<span style="font-size:9px;color:var(--muted)">↔ ${m.backup}</span>`:''}
+        <button style="background:#fff0f0;border:1px solid #ffd0d0;color:var(--risk);cursor:pointer;border-radius:5px;padding:2px 8px;font-size:10px;font-weight:600" onclick="removeLeaveMember('${m.name.replace(/'/g,"\\'")}','${team.key}')">✕</button>
+      </div>`;
+    });
+  });
+  listEl.innerHTML=html;
+}
+
+function addLeaveMember(){
+  const team=document.getElementById('mm-team').value;
+  const name=(document.getElementById('mm-name').value||'').trim();
+  const backup=(document.getElementById('mm-backup').value||'').trim();
+  if(!name) return;
+  if(leaveMembers.some(m=>m.team===team&&m.name===name)){alert('Member already exists in this team.');return;}
+  leaveMembers.push({team,name,backup});
+  document.getElementById('mm-name').value='';
+  document.getElementById('mm-backup').value='';
+  saveData();
+  renderMembersList();
+  renderLeave();
+}
+
+function removeLeaveMember(name,team){
+  if(!confirm(`Remove ${name} from ${team} team? All leave entries for them will also be removed.`)) return;
+  leaveMembers=leaveMembers.filter(m=>!(m.team===team&&m.name===name));
+  leaveEntries=leaveEntries.filter(e=>!(e.team===team&&e.member===name));
+  saveData();
+  renderMembersList();
+  renderLeave();
 }
 
 // ═══════════════ DATA MANAGER ═══════════════
@@ -2481,6 +2947,33 @@ if(dz){
   dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='var(--p1)';});
   dz.addEventListener('dragleave',()=>{dz.style.borderColor='var(--p8)';});
   dz.addEventListener('drop',e=>{e.preventDefault();dz.style.borderColor='var(--p8)';const f=e.dataTransfer.files[0];if(f){const dt=new DataTransfer();dt.items.add(f);document.getElementById('main-file').files=dt.files;handleMainUpload({target:{files:[f]}});}});
+}
+
+// ═══ PASSWORD GATE ═══
+const AUTH_KEY='pmo_auth_v1';
+const AUTH_PASS='pmo123';
+
+function checkAuth(){
+  const val=document.getElementById('auth-input').value;
+  const errEl=document.getElementById('auth-error');
+  if(val===AUTH_PASS){
+    sessionStorage.setItem(AUTH_KEY,'1');
+    document.getElementById('auth-gate').style.display='none';
+    document.getElementById('auth-input').value='';
+  } else {
+    errEl.textContent='Incorrect password. Please try again.';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+    setTimeout(()=>{errEl.textContent='';},2500);
+  }
+}
+
+// Auto-unlock if already authenticated this session
+if(sessionStorage.getItem(AUTH_KEY)==='1'){
+  document.getElementById('auth-gate').style.display='none';
+} else {
+  // Delay focus slightly so the element is visible
+  setTimeout(()=>document.getElementById('auth-input')?.focus(),100);
 }
 
 // Init
