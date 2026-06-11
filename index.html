@@ -120,7 +120,7 @@ html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:
 .gantt-name{width:180px;min-width:180px;font-size:10px;color:var(--p3);font-weight:600;padding-right:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gantt-track{flex:1;height:22px;background:#f5efe9;border-radius:4px;position:relative;overflow:visible}
 .gantt-bar{position:absolute;top:3px;height:16px;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:8px;color:#fff;font-weight:700;overflow:hidden;white-space:nowrap}
-.gantt-milestone{position:absolute;top:5px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:12px solid var(--p6);z-index:2;transform:translateX(-5px)}
+.gantt-milestone{position:absolute;top:4px;width:14px;height:14px;background:var(--p6);border:2px solid #fff;border-radius:2px;z-index:3;transform:translateX(-7px) rotate(45deg);box-shadow:0 1px 4px rgba(0,0,0,0.3);cursor:default}
 .gantt-today{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--risk);opacity:0.7;z-index:3}
 
 /* DETAIL PANEL */
@@ -335,7 +335,7 @@ input[type=file]{display:none}
   </div>
   <div class="nav-section">Overview</div>
   <div class="nav-item active" onclick="showPage('overview',this)">▪ Sector Overview</div>
-  <div class="nav-section">IT Projects</div>
+  <div class="nav-section">Program Projects</div>
   <div class="nav-item" onclick="showPage('projects',this)">▪ Project List</div>
   <div class="nav-item" onclick="showPage('timeline',this)">▪ Timeline / Gantt</div>
   <div class="nav-item" onclick="showPage('risks',this)">▪ Risks & Notes</div>
@@ -353,17 +353,17 @@ input[type=file]{display:none}
   <div class="nav-item" onclick="location.href='qa.html'" style="font-size:11px">▪ QA Team</div>
   <div class="nav-item" onclick="location.href='training.html'" style="font-size:11px">▪ Training</div>
   <div class="nav-item" onclick="location.href='marketing.html'" style="font-size:11px">▪ Marketing</div>
-  <div class="sidebar-footer" id="sidebar-period">Period: 2024 – 2026<br>Last updated: May 2025</div>
+  <div class="sidebar-footer" id="sidebar-period">Period: 2024 – 2027<br>Last updated: Jun 2026</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 <div class="topbar">
   <div class="topbar-title" id="page-title">Sector Overview</div>
-  <div class="period-badge" id="topbar-period">📅 Jan 2024 – Dec 2026</div>
+  <div class="period-badge" id="topbar-period">📅 Nov 2024 – Apr 2027</div>
   <span class="save-badge saved" id="save-badge" title="Data is stored in your browser's localStorage">✓ Ready</span>
   <select class="filter-sel" id="global-year" onchange="globalFilter(this.value)" style="width:90px">
-    <option value="all">All Years</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
+    <option value="all">All Years</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
   </select>
   <button class="btn btn-primary" onclick="openModal('add-project')">+ Add Project</button>
   <button class="btn btn-outline" onclick="openModal('add-note')">+ Risk/Note</button>
@@ -375,7 +375,7 @@ input[type=file]{display:none}
 <!-- ═══════════════ SECTOR OVERVIEW ═══════════════ -->
 <div id="page-overview" class="page active">
   <div class="stats-row">
-    <div class="stat-card info"><div class="stat-label">IT Sector Projects</div><div class="stat-value" id="ov-total">6</div><div class="stat-sub">Total active projects</div></div>
+    <div class="stat-card info"><div class="stat-label">Program Projects</div><div class="stat-value" id="ov-total">6</div><div class="stat-sub">Total active projects</div></div>
     <div class="stat-card ok"><div class="stat-label">On Track</div><div class="stat-value" id="ov-ontrack" style="color:var(--ok)">4</div><div class="stat-sub">Projects on schedule</div></div>
     <div class="stat-card warn"><div class="stat-label">At Risk / Delayed</div><div class="stat-value" id="ov-risk" style="color:var(--warn)">2</div><div class="stat-sub">Need attention</div></div>
     <div class="stat-card"><div class="stat-label">CR Overall Progress</div><div class="stat-value" id="ov-cr-prog" style="color:var(--p1)">—%</div><div class="stat-sub" id="ov-cr-sub">Avg across all CRs</div></div>
@@ -383,10 +383,16 @@ input[type=file]{display:none}
   </div>
 
   <div class="grid-2" style="margin-bottom:14px">
-    <!-- Upcoming IT Project Milestones -->
+    <!-- Upcoming Program Milestones -->
     <div class="card">
-      <div class="card-title"><div class="card-title-left">Upcoming IT Project Milestones</div><div style="font-size:9px;color:var(--muted)">Next 12 months</div></div>
+      <div class="card-title">
+        <div class="card-title-left">Upcoming Program Milestones</div>
+        <select id="ov-ms-proj-filter" class="filter-sel" onchange="renderOvMilestones()" style="font-size:9px;padding:3px 7px;max-width:170px"></select>
+      </div>
       <div id="ov-milestones"></div>
+      <div id="ov-ms-showmore" style="display:none;text-align:center;padding:6px 0;border-top:1px solid #f5efe8;margin-top:2px">
+        <button class="btn btn-outline" onclick="toggleOvMilestones()" style="font-size:10px;padding:4px 14px" id="ov-ms-toggle-btn">Show more</button>
+      </div>
     </div>
     <!-- CR Projects by Classification and Status — stacked horizontal bar -->
     <div class="card">
@@ -421,7 +427,7 @@ input[type=file]{display:none}
   </div>
   <div class="card" style="padding:0;overflow:hidden">
     <table class="data-table">
-      <thead><tr><th>Project Name</th><th>Category</th><th>Start</th><th>End</th><th>Progress</th><th>Status</th><th>Lead</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Project Name</th><th>Start</th><th>End</th><th>Progress</th><th>Status</th><th>Project Manager</th><th>Actions</th></tr></thead>
       <tbody id="proj-tbody"></tbody>
     </table>
   </div>
@@ -430,7 +436,16 @@ input[type=file]{display:none}
 <!-- ═══════════════ TIMELINE ═══════════════ -->
 <div id="page-timeline" class="page">
   <div class="card">
-    <div class="card-title"><div class="card-title-left">Project Gantt Timeline — Click a project for details</div></div>
+    <div class="card-title">
+      <div class="card-title-left">Program Gantt Timeline — Click a project for details</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <label style="font-size:10px;color:var(--muted)">From</label>
+        <input type="month" id="gantt-from" value="2024-11" class="filter-sel" style="width:130px;font-family:'Cairo',sans-serif">
+        <label style="font-size:10px;color:var(--muted)">To</label>
+        <input type="month" id="gantt-to" value="2027-06" class="filter-sel" style="width:130px;font-family:'Cairo',sans-serif">
+        <button class="btn btn-outline" onclick="renderTimeline()" style="font-size:10px;padding:4px 12px">Apply</button>
+      </div>
+    </div>
     <div class="gantt-wrap" id="gantt-wrap"></div>
   </div>
   <div id="proj-detail-panel" class="detail-panel"></div>
@@ -438,22 +453,48 @@ input[type=file]{display:none}
 
 <!-- ═══════════════ RISKS & NOTES ═══════════════ -->
 <div id="page-risks" class="page">
-  <div class="grid-2">
+  <!-- Type filter bar + Add button -->
+  <div style="display:flex;gap:6px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+    <div style="display:flex;gap:4px;flex-wrap:wrap">
+      <div class="cat-pill active" onclick="filterNotes('all',this)">All</div>
+      <div class="cat-pill" onclick="filterNotes('risk',this)" style="border-color:var(--risk);color:var(--risk)">Risk</div>
+      <div class="cat-pill" onclick="filterNotes('issue',this)" style="border-color:var(--warn);color:var(--warn)">Issue</div>
+      <div class="cat-pill" onclick="filterNotes('approval',this)" style="border-color:var(--ok);color:var(--ok)">Needs Approval</div>
+      <div class="cat-pill" onclick="filterNotes('info',this)">Note</div>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('add-note')" style="margin-left:auto">+ Add</button>
+  </div>
+
+  <!-- Two columns: Program Projects | CRs -->
+  <div class="grid-2" style="margin-bottom:14px">
+    <!-- Program Projects -->
     <div class="card">
-      <div class="rn-header"><div class="card-title-left" style="font-size:10px;font-weight:700;color:var(--p3);text-transform:uppercase;letter-spacing:0.8px">Risks, Issues & Notes</div><button class="btn btn-primary" onclick="openModal('add-note')">+ Add</button></div>
-      <div style="display:flex;gap:6px;margin-bottom:12px">
-        <div class="cat-pill active" onclick="filterNotes('all',this)">All</div>
-        <div class="cat-pill" onclick="filterNotes('risk',this)" style="border-color:var(--risk);color:var(--risk)">Risk</div>
-        <div class="cat-pill" onclick="filterNotes('issue',this)" style="border-color:var(--warn);color:var(--warn)">Issue</div>
-        <div class="cat-pill" onclick="filterNotes('approval',this)" style="border-color:var(--ok);color:var(--ok)">Needs Approval</div>
-        <div class="cat-pill" onclick="filterNotes('info',this)">Note</div>
+      <div class="card-title">
+        <div class="card-title-left">Program Projects</div>
+        <select id="notes-proj-filter" class="filter-sel" onchange="renderNotes()" style="font-size:9px;padding:3px 7px;max-width:165px"></select>
       </div>
-      <div id="notes-list"></div>
+      <div id="notes-prog-list"></div>
+      <div id="notes-prog-more" style="display:none;text-align:center;padding:6px 0;border-top:1px solid #f5efe8;margin-top:2px">
+        <button class="btn btn-outline" onclick="toggleNotes('prog')" style="font-size:10px;padding:4px 14px" id="notes-prog-btn">Show more</button>
+      </div>
     </div>
+    <!-- CR notes -->
     <div class="card">
-      <div class="card-title"><div class="card-title-left">Risk Summary</div></div>
-      <div id="risk-summary-content"></div>
+      <div class="card-title">
+        <div class="card-title-left">Change Requests (CRs)</div>
+        <select id="notes-cr-filter" class="filter-sel" onchange="renderNotes()" style="font-size:9px;padding:3px 7px;max-width:165px"></select>
+      </div>
+      <div id="notes-cr-list"></div>
+      <div id="notes-cr-more" style="display:none;text-align:center;padding:6px 0;border-top:1px solid #f5efe8;margin-top:2px">
+        <button class="btn btn-outline" onclick="toggleNotes('cr')" style="font-size:10px;padding:4px 14px" id="notes-cr-btn">Show more</button>
+      </div>
     </div>
+  </div>
+
+  <!-- Risk Summary (full width below) -->
+  <div class="card">
+    <div class="card-title"><div class="card-title-left">Risk Summary</div></div>
+    <div id="risk-summary-content"></div>
   </div>
 </div>
 
@@ -480,10 +521,11 @@ input[type=file]{display:none}
     </div>
   </div>
 
-  <!-- CR Projects by Phase Status — the main status breakdown -->
+  <!-- Projects by Classification and Status — stacked horizontal bar -->
   <div class="card" style="margin-bottom:14px">
-    <div class="card-title"><div class="card-title-left">CR Projects by Status</div><div style="font-size:9px;color:var(--muted)">Count of CRs currently in each phase — High Risk is a separate flag</div></div>
-    <div id="cr-phase-status-detail"></div>
+    <div class="card-title"><div class="card-title-left">Projects by Classification and Status</div><div style="font-size:9px;color:var(--muted)" id="cr-dash-cls-label"></div></div>
+    <div style="position:relative;height:230px"><canvas id="crDashClassStatusChart"></canvas></div>
+    <div id="cr-dash-high-risk-row" style="margin-top:10px"></div>
   </div>
 
   <!-- SOW / Training / Marketing flags -->
@@ -598,13 +640,24 @@ input[type=file]{display:none}
 
 <!-- ═══════════════ TEAM ALLOCATION ═══════════════ -->
 <div id="page-allocation" class="page">
-  <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+  <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
     <div class="tab-bar" style="margin-bottom:0">
       <div class="tab active" onclick="showAllocTab('csi',this)">CSI Team (BA)</div>
       <div class="tab" onclick="showAllocTab('tt',this)">TT Team (Dev & Deploy)</div>
       <div class="tab" onclick="showAllocTab('qa',this)">QA Team (QA & UAT)</div>
     </div>
-    <span style="margin-left:auto;font-size:10px;color:var(--muted)">Live data from CR list — edit via CR Data Manager</span>
+    <select id="alloc-status-filter" class="filter-sel" onchange="renderAllocation()" style="font-size:10px;max-width:200px">
+      <option value="">All CR Statuses</option>
+      <option>Deployed</option>
+      <option>Development</option>
+      <option>Testing</option>
+      <option>Ready for Deployment</option>
+      <option>Development Queued</option>
+      <option>Analysis</option>
+      <option>On Hold</option>
+      <option>In Pipeline</option>
+    </select>
+    <span style="font-size:10px;color:var(--muted)">Live data from CR list — edit via CR Data Manager</span>
   </div>
   <div id="alloc-csi" class="alloc-tab-pane">
     <div style="display:grid;grid-template-columns:1fr 300px;gap:14px">
@@ -805,11 +858,21 @@ input[type=file]{display:none}
     <div class="form-row"><label>Start Date</label><input type="date" id="f-start"></div>
     <div class="form-row"><label>End Date</label><input type="date" id="f-end"></div>
     <div class="form-row"><label>Progress (%)</label><input type="number" id="f-progress" min="0" max="100" value="0"></div>
-    <div class="form-row"><label>Status</label><select id="f-status"><option>On Track</option><option>At Risk</option><option>Delayed</option><option>Completed</option></select></div>
+    <div class="form-row"><label>Status</label><select id="f-status"><option value="auto">Auto-detect from milestones</option><option>On Track</option><option>At Risk</option><option>Delayed</option><option>Completed</option></select></div>
     <div class="form-row"><label>Project Lead</label><input type="text" id="f-lead" placeholder="Lead name"></div>
     <div class="form-row"><label>Partner / Vendor</label><input type="text" id="f-partner" placeholder="External partner (optional)"></div>
   </div>
-  <div class="form-row"><label>Milestones (one per line: Name|YYYY-MM-DD)</label><textarea id="f-milestones" placeholder="Kickoff|2024-01-15&#10;Go-Live|2025-06-01"></textarea></div>
+  <div class="form-row">
+    <label>Milestones</label>
+    <div style="display:grid;grid-template-columns:1fr 130px 75px 28px;gap:5px;margin-bottom:4px;padding:0 2px">
+      <span style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Name</span>
+      <span style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Due Date</span>
+      <span style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Done %</span>
+      <span></span>
+    </div>
+    <div id="f-milestone-rows" style="max-height:200px;overflow-y:auto"></div>
+    <button type="button" onclick="addMilestoneRow()" class="btn btn-outline" style="margin-top:6px;font-size:10px;padding:4px 12px">+ Add Milestone</button>
+  </div>
   <div class="form-row"><label>Description / Notes</label><textarea id="f-desc" placeholder="Project overview…"></textarea></div>
   <input type="hidden" id="f-edit-id" value="">
   <div class="modal-footer">
@@ -963,18 +1026,76 @@ const TODAY = new Date();
 // ── GLOBAL: days past due before a CR is flagged High Risk (change here to adjust) ──
 const DELAY_THRESHOLD_DAYS = 5;
 const CR_CATS = {CSI:'Continuous Service Improvement',OPS:'Operational',STR:'Strategic',PRE:'Process Re-Engineering',DIG:'Digital Transformation'};
+function normMktFlag(m){if(!m||m===''||m==='-') return 'N/A';const l=m.toLowerCase();if(l.includes('published')||l.includes('publish')) return 'Published';if(l==='na'||l==='n/a') return 'N/A';if(l.includes('internal')) return 'Internal';if(l.includes('external')) return 'External';if(l.includes('progress')||l.includes('content')||l.includes('ready')||l.includes('approval')) return 'In Progress';if(l.includes('hold')) return 'On Hold';return 'N/A';}
 const CR_CAT_COLORS = {CSI:'#782D55',OPS:'#8B556A',STR:'#5C243F',PRE:'#A29475',DIG:'#E0AC92'};
 const PHASE_NAMES = ['BA (CSI)','Dev (TT)','QA','UAT (QA)','Deploy (TT)'];
 const PHASE_COLORS = ['#782D55','#8B556A','#A29475','#C1BBA8','#5C243F'];
 const STATUS_COLORS = {Done:'#27ae60','In Progress':'#782D55',Pending:'#e0d8cf'};
 
 let sectorProjects = [
-  {id:1,name:'CUA Platform',category:'Platform',start:'2024-01-01',end:'2025-12-31',progress:72,status:'On Track',lead:'Ahmed Al-Dosari',partner:'',milestones:[{name:'Requirements Freeze',date:'2024-03-15'},{name:'Beta Launch',date:'2025-02-01'},{name:'Go-Live',date:'2025-12-31'}],desc:'Core user authentication and customs operations platform.'},
-  {id:2,name:'Financial Hub',category:'Hub',start:'2024-03-01',end:'2025-09-30',progress:55,status:'At Risk',lead:'Sara Al-Mansoori',partner:'Malomatia',milestones:[{name:'Architecture Sign-off',date:'2024-05-15'},{name:'UAT Start',date:'2025-07-01'}],desc:'Centralized financial data hub integrating all customs revenue streams.'},
-  {id:3,name:'Modern Data Platform',category:'Data',start:'2023-10-01',end:'2025-06-30',progress:88,status:'On Track',lead:'Khalid Ibrahim',partner:'',milestones:[{name:'Data Migration Complete',date:'2024-08-01'},{name:'Final Release',date:'2025-06-30'}],desc:'Cloud-native data platform replacing legacy data warehouse.'},
-  {id:4,name:'Data Quality Framework',category:'Quality',start:'2024-06-01',end:'2026-03-31',progress:34,status:'On Track',lead:'Mariam Hassan',partner:'',milestones:[{name:'Pilot Program',date:'2025-02-01'},{name:'Full Rollout',date:'2026-01-15'}],desc:'Data quality monitoring and governance framework.'},
-  {id:5,name:'Customs Portal v2',category:'Platform',start:'2024-09-01',end:'2026-06-30',progress:18,status:'On Track',lead:'Omar Yousuf',partner:'',milestones:[{name:'Design Approved',date:'2025-03-01'},{name:'Dev Complete',date:'2026-03-01'}],desc:'Next generation customs self-service portal.'},
-  {id:6,name:'Logistics Analytics',category:'Data',start:'2024-04-01',end:'2025-03-31',progress:100,status:'Completed',lead:'Noor Al-Rashidi',partner:'',milestones:[],desc:'Real-time logistics KPI analytics dashboard.'},
+  {id:1,name:'CUA Data Exchange Platform',category:'Platform',start:'2025-10-02',end:'2027-04-05',progress:58,status:'Delayed',lead:'',partner:'',milestones:[
+    {name:'Dev – Phase 1 (A)',date:'2025-12-14',pct:100},
+    {name:'UAT – Phase 1 (A)',date:'2025-12-29',pct:100},
+    {name:'Go-live – Phase 1 (A)',date:'2025-12-31',pct:100},
+    {name:'Req & Analysis – Phase 1 (B)',date:'2026-02-05',pct:100},
+    {name:'ISD & BRD – Phase 1 (B)',date:'2026-02-08',pct:100},
+    {name:'Dev – Phase 1 (B)',date:'2026-02-26',pct:100},
+    {name:'Req & Analysis – Phase 2',date:'2026-02-22',pct:100},
+    {name:'ISD & BRD – Phase 2',date:'2026-03-12',pct:100},
+    {name:'UAT – Phase 1 (B)',date:'2026-05-14',pct:100},
+    {name:'Go-live (Push)',date:'2026-05-31',pct:0},
+    {name:'Test Scenarios doc (Ph.2)',date:'2026-06-15',pct:0},
+    {name:'Dev – Phase 2',date:'2026-06-25',pct:80},
+    {name:'Req & Analysis – Phase 3',date:'2026-06-29',pct:30},
+    {name:'UAT – Phase 2',date:'2026-07-01',pct:0},
+    {name:'ISD & BRD – Phase 3',date:'2026-07-30',pct:0},
+    {name:'Go-live – Phase 2',date:'2026-07-30',pct:0},
+    {name:'Test Scenarios doc (Ph.3)',date:'2026-11-01',pct:0},
+    {name:'Dev – Phase 3',date:'2026-11-18',pct:0},
+    {name:'UAT – Phase 3',date:'2026-12-03',pct:0},
+    {name:'Go-live – Phase 3',date:'2026-12-31',pct:0},
+    {name:'Knowledge Transfer (KT)',date:'2027-01-17',pct:0},
+    {name:'Hypercare / Support (3 Months)',date:'2027-04-15',pct:0},
+  ],desc:'Data exchange platform connecting CUA with external systems, delivered across 3 phases.'},
+  {id:2,name:'Financial Hub',category:'Hub',start:'2025-11-12',end:'2026-12-09',progress:24,status:'At Risk',lead:'',partner:'',milestones:[
+    {name:'Project Kick-off Meeting',date:'2025-11-12',pct:100},
+    {name:'Project Charter Approval',date:'2025-11-19',pct:100},
+    {name:'Current State Assessment',date:'2025-12-09',pct:100},
+    {name:'Best Practices & Gap Analysis',date:'2026-01-28',pct:100},
+    {name:'Customization Specs Document',date:'2026-04-29',pct:31},
+    {name:'BRD Document',date:'2026-05-25',pct:75},
+    {name:'Preparation Stage',date:'2026-06-07',pct:0},
+    {name:'Development Sprint 1',date:'2026-07-29',pct:0},
+    {name:'Development Sprint 2',date:'2026-08-23',pct:0},
+    {name:'System Development & Testing',date:'2026-11-16',pct:0},
+    {name:'System Migration',date:'2026-12-07',pct:0},
+    {name:'Final Activation',date:'2026-12-09',pct:0},
+    {name:'Technical Architecture & AlNadeeb Integration Design',date:'2026-10-04',pct:6},
+  ],desc:'Centralized financial hub integrating customs financial operations with the AlNadeeb system.'},
+  {id:3,name:'Modern Data Platform',category:'Data',start:'2024-11-11',end:'2026-11-15',progress:50,status:'At Risk',lead:'',partner:'',milestones:[
+    {name:'Project Plan Sign Off',date:'2025-02-27',pct:100},
+    {name:'PM-1: Project Kick Off & Plan Sign Off',date:'2025-02-27',pct:100},
+    {name:'Assessment Report',date:'2025-03-27',pct:100},
+    {name:'PM-2: Release-1 BRD',date:'2025-03-27',pct:100},
+    {name:'PM-3: Release-2 BRD',date:'2025-05-05',pct:100},
+    {name:'PM-4: Release-3 BRD',date:'2025-07-01',pct:100},
+    {name:'PM-6: Platform Provisioning (3 Environments)',date:'2025-11-30',pct:50},
+    {name:'PM-5: High Level Design',date:'2026-02-01',pct:100},
+    {name:'Stream-1 Complete',date:'2026-02-05',pct:99},
+    {name:'Release-3: Implementation Support',date:'2026-10-15',pct:0},
+    {name:'Training Plan Sign Off',date:'2026-11-15',pct:0},
+    {name:'Standard Operating Procedure Sign Off',date:'2026-11-15',pct:0},
+  ],desc:'Cloud-native modern data platform delivered across 2 streams: Assessment & HLD, then Low Level Design & Build.'},
+  {id:4,name:'Data Quality Initiative',category:'Quality',start:'2025-04-16',end:'2026-07-13',progress:46,status:'Delayed',lead:'',partner:'',milestones:[
+    {name:'M5: All Deliverables Final Sign-off (Phase 1)',date:'2025-07-23',pct:100},
+    {name:'Phase 2 Start',date:'2025-10-26',pct:48},
+    {name:'Phase 2.1 – Plan (Governance Foundation)',date:'2026-02-03',pct:100},
+    {name:'Phase 2.2 – Assess (Profiling & Baseline)',date:'2026-01-06',pct:57},
+    {name:'Phase 1 Complete',date:'2026-04-23',pct:100},
+    {name:'Phase 2.3 Deliverables Summary',date:'2026-06-09',pct:31},
+    {name:'Phase 2.4 Deliverables Summary',date:'2026-06-16',pct:0},
+    {name:'Phase 2.5 – Governance & Continuous Improvement',date:'2026-07-13',pct:0},
+  ],desc:'Data governance and quality initiative across 5 phases: assessment, profiling, governance foundation, and continuous improvement.'},
 ];
 
 // ── Helper: normalise any status string into Done / In Progress / Pending ──
@@ -1072,14 +1193,39 @@ let crProjects = [
 ];
 
 let notes = [
-  {type:'risk',proj:'Financial Hub',desc:'Integration with legacy ERP not completed. Blocking UAT start.',by:'Sara Al-Mansoori',date:'2025-04-28'},
-  {type:'issue',proj:'CR-2024-003',desc:'Dev environment down, impacting Phase 2 progress for 3 CRs.',by:'TT Team Lead',date:'2025-05-01'},
-  {type:'approval',proj:'CUA Platform',desc:'Budget extension request pending Finance approval.',by:'Ahmed Al-Dosari',date:'2025-05-05'},
-  {type:'info',proj:'Data Quality Framework',desc:'Pilot successfully completed. Moving to full rollout planning.',by:'Mariam Hassan',date:'2025-04-20'},
+  // Program-level risks
+  {type:'risk',proj:'Financial Hub',desc:'BRD Document was due 25-May-26 and is at 75% — now 17 days overdue. If not closed by end of June, Track 2 (Engineering) start will slip.',by:'PMO',date:'2026-06-01'},
+  {type:'risk',proj:'Data Quality Initiative',desc:'Phase 2.2 (Assess / Profiling & Baseline) was due 6-Jan-26 and stands at 57% — over 5 months overdue. Phase 2.3 deliverables closed at 31% as of 9-Jun-26. Serious schedule risk.',by:'PMO',date:'2026-06-10'},
+  {type:'risk',proj:'Modern Data Platform',desc:'PM-6 Platform Provisioning (3 Environments) was due 30-Nov-25 and stands at 50%. This is a payment milestone — blocking Stream-2 kick-off.',by:'PMO',date:'2026-01-15'},
+  {type:'risk',proj:'Data Quality Initiative',desc:'Phase 2.3 and 2.4 deliverables overlap in June. Assigned resources are shared with Financial Hub BRD work, creating a conflict. Recommend re-sequencing.',by:'PMO',date:'2026-06-09'},
+  // Program-level issues
+  {type:'issue',proj:'CUA Data Exchange Platform',desc:'Go-live (Push) milestone was due 31-May-26 and remains at 0%. Test Scenarios doc (Ph.2) due 15-Jun-26 also has not started. Client team not yet engaged for UAT planning.',by:'PMO',date:'2026-06-05'},
+  {type:'issue',proj:'Modern Data Platform',desc:'Stream-1 completion certificate has not been signed by the vendor. Holding up PM-6 payment release and Stream-2 formal start.',by:'PMO',date:'2026-03-10'},
+  // Program-level approvals
+  {type:'approval',proj:'Financial Hub',desc:'Track 2 vendor invoice #FH-2026-042 submitted for QAR 285,000. Awaiting Finance Manager signature. Milestone payment unlock is blocked.',by:'PMO',date:'2026-05-28'},
+  {type:'approval',proj:'Modern Data Platform',desc:'Stream-1 acceptance certificate requires sign-off from both PMO and vendor PM. Sent for review on 2026-03-08 — no response after 3 follow-ups.',by:'PMO',date:'2026-04-01'},
+  {type:'approval',proj:'Data Quality Initiative',desc:'Phase 2.5 Governance Framework document requires CIO endorsement before work can begin. Submitted 2026-06-01, decision pending.',by:'PMO',date:'2026-06-01'},
+  // Program-level info
+  {type:'info',proj:'CUA Data Exchange Platform',desc:'Phase 1 (A) and Phase 1 (B) delivered successfully. Phase 2 dev is 80% complete. Main risk is Test Scenarios and UAT engagement — needs client action this month.',by:'PMO',date:'2026-06-08'},
+  {type:'info',proj:'Modern Data Platform',desc:'Payment Milestones 2–5 and Assessment Report all completed on time. PM-6 is the only blocker before Stream-2 starts.',by:'PMO',date:'2026-03-01'},
+  // CR-level risks
+  {type:'risk',proj:'CR250009',desc:'AI Virtual Assistant BRD internal review still In Progress past the 7-Aug-25 due date. Dev start is blocked until BRD receives GAC approval.',by:'PMO',date:'2025-08-10'},
+  {type:'risk',proj:'CR230011',desc:'Customs Warehouse Re-engineering (Phase 1) has no TT members assigned. Dev due 31-Dec-26 is at serious risk without resource confirmation by July.',by:'PMO',date:'2026-05-15'},
+  {type:'risk',proj:'CR240001',desc:'Law & Enforcement Unit Re-Engineering (Phase 2) has 1,231 TT mandays allocated but no dev due date set. Recommend scheduling a milestone alignment meeting before Q3.',by:'PMO',date:'2026-04-12'},
+  // CR-level issues
+  {type:'issue',proj:'CR250018',desc:'QNB HDPS (Hitachi Digital Payment) UAT has been On Hold since Jul-25 due to client-side environment issues. Deployment target of 30-Jul-25 is now 11+ months overdue.',by:'PMO',date:'2025-09-15'},
+  {type:'issue',proj:'CR250001',desc:'QatarPass UAT is on hold — awaiting ministry confirmation. Three follow-up emails sent since May-26 with no response. Recommend escalating to project sponsor.',by:'PMO',date:'2026-05-25'},
+  {type:'issue',proj:'CR230014',desc:'SAB (Audit Bureau) Data Exchange deployment is blocked. UAT placed on hold July-25 due to Audit Bureau environment access not granted. No resolution date confirmed.',by:'PMO',date:'2025-10-01'},
+  // CR-level approvals
+  {type:'approval',proj:'CR250027',desc:'MoPH Food Shipments integration SOW pending signature from both legal teams. CR number not yet assigned. Estimated sign-off: end of Aug-25.',by:'PMO',date:'2025-07-31'},
+  {type:'approval',proj:'CR250028',desc:'Declaration XML Enhancement SOW pending signature. BRD done as of 7-Aug-25 but CR cannot proceed to development without signed SOW.',by:'PMO',date:'2025-08-08'},
+  // CR-level info
+  {type:'info',proj:'CR250014',desc:'Anti-Dumping Unit dev is In Progress with DDS expected 25-Aug-26. UAT planned for Sep-26. Marketing and training coordination to start Q3.',by:'PMO',date:'2026-06-01'},
+  {type:'info',proj:'CR250008',desc:'Hssify AI HS Code Classification is 40% through dev (due 31-Jul-26). Vendor confirmed timeline is on track. Marketing material draft already in progress.',by:'PMO',date:'2026-06-01'},
 ];
 
 // ═══════════════ PERSISTENCE (localStorage) ═══════════════
-const LS = {crs:'cl_alnadeeb_crs_v2',proj:'cl_alnadeeb_proj_v1',notes:'cl_alnadeeb_notes_v1',ts:'cl_alnadeeb_ts_v1'};
+const LS = {crs:'cl_alnadeeb_crs_v2',proj:'cl_alnadeeb_proj_v2',notes:'cl_alnadeeb_notes_v2',ts:'cl_alnadeeb_ts_v2'};
 
 function saveData(){
   try{
@@ -1124,7 +1270,7 @@ function showSaveBadge(cls,msg){
 
 let crCatFilter='all',crYearFilter='all';
 let allocTab='csi';
-let catDonutChart,statusDonutChart,classComplexChartInst,sowChartInst,trainChartInst,mktChartInst,classStatusChartInst;
+let catDonutChart,statusDonutChart,classComplexChartInst,sowChartInst,trainChartInst,mktChartInst,classStatusChartInst,crDashClassStatusChartInst;
 let csiAllocChart,ttAllocChart,qaAllocChart;
 
 // ═══════════════ NAVIGATION ═══════════════
@@ -1133,7 +1279,7 @@ function showPage(id,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if(el) el.classList.add('active');
-  const titles={overview:'Sector Overview','cr-overview':'CR Dashboard (Alnadeeb)','cr-list':'CR Project List','cr-cards':'CR Cards',projects:'IT Sector Projects',timeline:'Project Timeline / Gantt',risks:'Risks, Issues & Notes',allocation:'Team Allocation','data-manager':'CR Data Manager',import:'Import / Export Data'};
+  const titles={overview:'Sector Overview','cr-overview':'CR Dashboard (Alnadeeb)','cr-list':'CR Project List','cr-cards':'CR Cards',projects:'Program Projects',timeline:'Project Timeline / Gantt',risks:'Risks, Issues & Notes',allocation:'Team Allocation','data-manager':'CR Data Manager',import:'Import / Export Data'};
   document.getElementById('page-title').textContent=titles[id]||id;
   const renderers={overview:renderOverview,projects:renderProjects,timeline:renderTimeline,risks:renderNotes,'cr-overview':renderCROverview,'cr-list':renderCRListTable,'cr-cards':renderCRList,allocation:renderAllocation,'data-manager':renderDataManager};
   if(renderers[id]) renderers[id]();
@@ -1159,36 +1305,13 @@ function renderOverview(){
   const subEl=document.getElementById('ov-cr-sub');if(subEl) subEl.textContent='Avg across all '+crs.length+' CRs';
   document.getElementById('ov-delay-cr').textContent=crs.filter(c=>c.delayRisk).length;
 
-  // Upcoming IT milestones
-  const allMilestones = [];
-  sectorProjects.forEach(p=>{
-    (p.milestones||[]).forEach(m=>{
-      if(m.date >= TODAY.toISOString().slice(0,10)) allMilestones.push({proj:p.name,status:p.status,...m});
-    });
-  });
-  allMilestones.sort((a,b)=>a.date>b.date?1:-1);
-  const cutoff = new Date(TODAY); cutoff.setFullYear(cutoff.getFullYear()+1);
-  const upcoming = allMilestones.filter(m=>m.date <= cutoff.toISOString().slice(0,10));
-  let msHtml = '';
-  if(!upcoming.length) msHtml = '<div style="color:var(--muted);font-size:11px;padding:6px 0">No upcoming milestones in next 12 months.</div>';
-  else upcoming.forEach(m=>{
-    const daysLeft = Math.round((new Date(m.date)-TODAY)/(1000*60*60*24));
-    const urgent = daysLeft <= 30;
-    const sc = m.status==='Completed'?'badge-green':m.status==='At Risk'?'badge-amber':m.status==='Delayed'?'badge-red':'badge-blue';
-    msHtml += `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5efe8">
-      <div style="width:8px;height:8px;border-radius:50%;background:${urgent?'var(--warn)':'var(--p6)'};flex-shrink:0"></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:11px;font-weight:600;color:var(--p3)">${m.name}</div>
-        <div style="font-size:9px;color:var(--muted)">${m.proj}</div>
-      </div>
-      <span class="badge ${sc}" style="flex-shrink:0">${m.status}</span>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="font-size:10px;font-weight:700;color:${urgent?'var(--warn)':'var(--p3)'}">${m.date}</div>
-        <div style="font-size:9px;color:${urgent?'var(--warn)':'var(--muted)'}">${daysLeft}d</div>
-      </div>
-    </div>`;
-  });
-  document.getElementById('ov-milestones').innerHTML = msHtml;
+  // Upcoming IT milestones — populate project filter then delegate to renderOvMilestones()
+  const msFilterEl = document.getElementById('ov-ms-proj-filter');
+  if(msFilterEl){
+    const curVal = msFilterEl.value;
+    msFilterEl.innerHTML = '<option value="">All Projects</option>' + sectorProjects.map(p=>`<option value="${p.name}"${p.name===curVal?' selected':''}>${p.name}</option>`).join('');
+  }
+  renderOvMilestones();
 
   // CR Projects by Classification and Status — stacked horizontal bar chart (website palette)
   const PS_STATUSES = ['Analysis','Deployed','Development','Development Queued','In Pipeline','On Hold','Ready for Deployment','Testing'];
@@ -1253,6 +1376,83 @@ function renderOverview(){
   document.getElementById('phase-pipeline').innerHTML=pipeHtml;
 }
 
+// ── Milestone list renderer (called from overview & filter change) ──
+let ovMilestonesExpanded = false;
+function renderOvMilestones(){
+  const todayStr = TODAY.toISOString().slice(0,10);
+  const projFilter = document.getElementById('ov-ms-proj-filter')?.value || '';
+  const allMs = [];
+  sectorProjects.forEach(p=>{
+    if(projFilter && p.name !== projFilter) return;
+    (p.milestones||[]).forEach(m=>{
+      const isPast = m.date < todayStr;
+      const isIncomplete = m.pct === undefined || m.pct < 100;
+      if(!isPast || isIncomplete) allMs.push({proj:p.name,projStatus:p.status,...m});
+    });
+  });
+  allMs.sort((a,b)=>a.date>b.date?1:-1);
+  const cutoff = new Date(TODAY); cutoff.setFullYear(cutoff.getFullYear()+1);
+  const upcoming = allMs.filter(m=>m.date <= cutoff.toISOString().slice(0,10));
+
+  const showMoreEl = document.getElementById('ov-ms-showmore');
+  const toggleBtn = document.getElementById('ov-ms-toggle-btn');
+  const visible = ovMilestonesExpanded ? upcoming : upcoming.slice(0,6);
+  const remaining = upcoming.length - 6;
+  if(showMoreEl){
+    if(upcoming.length > 6){
+      showMoreEl.style.display='block';
+      if(toggleBtn) toggleBtn.textContent = ovMilestonesExpanded ? 'Show less' : `Show ${remaining} more`;
+    } else {
+      showMoreEl.style.display='none';
+    }
+  }
+
+  let html='';
+  if(!visible.length) html='<div style="color:var(--muted);font-size:11px;padding:8px 0">No upcoming milestones in the next 12 months.</div>';
+  else visible.forEach(m=>{
+    const daysLeft = Math.round((new Date(m.date)-TODAY)/(1000*60*60*24));
+    const overdue = daysLeft < 0;
+    const urgent = !overdue && daysLeft <= 30;
+    let sc,statusLabel;
+    if(m.pct !== undefined){
+      if(m.pct===100){sc='badge-green';statusLabel='Done';}
+      else if(overdue){sc='badge-red';statusLabel='Overdue';}
+      else if(m.pct>0){sc='badge-amber';statusLabel=m.pct+'%';}
+      else{sc='badge-gray';statusLabel='Not Started';}
+    } else {
+      sc=m.projStatus==='Completed'?'badge-green':m.projStatus==='At Risk'?'badge-amber':m.projStatus==='Delayed'?'badge-red':'badge-blue';
+      statusLabel=m.projStatus;
+    }
+    const dotColor = overdue?'var(--risk)':urgent?'var(--warn)':'var(--p6)';
+    html+=`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5efe8">
+      <div style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:600;color:var(--p3)">${m.name}</div>
+        <div style="font-size:9px;color:var(--muted)">${m.proj}</div>
+      </div>
+      <span class="badge ${sc}" style="flex-shrink:0">${statusLabel}</span>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:10px;font-weight:700;color:${overdue?'var(--risk)':urgent?'var(--warn)':'var(--p3)'}">${m.date}</div>
+        <div style="font-size:9px;color:${overdue?'var(--risk)':urgent?'var(--warn)':'var(--muted)'}">${overdue?Math.abs(daysLeft)+'d overdue':daysLeft+'d'}</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('ov-milestones').innerHTML=html;
+}
+function toggleOvMilestones(){ovMilestonesExpanded=!ovMilestonesExpanded;renderOvMilestones();}
+
+// ── Auto-compute project status from milestone overdue-ness ──
+function computeProjectStatus(p){
+  const todayStr=TODAY.toISOString().slice(0,10);
+  const ms=(p.milestones||[]).filter(m=>m.pct!==undefined);
+  if(!ms.length) return 'On Track';
+  if(ms.every(m=>m.pct===100)) return 'Completed';
+  const overdue=ms.filter(m=>m.pct<100&&m.date<todayStr);
+  if(!overdue.length) return 'On Track';
+  const maxDays=Math.max(...overdue.map(m=>Math.round((new Date(todayStr)-new Date(m.date))/86400000)));
+  return maxDays>30?'Delayed':'At Risk';
+}
+
 // ═══════════════ PROJECTS ═══════════════
 function renderProjects(){
   const sf=document.getElementById('pf-status').value;
@@ -1263,16 +1463,15 @@ function renderProjects(){
   else if(so==='end') list.sort((a,b)=>a.end>b.end?1:-1);
   else list.sort((a,b)=>a.name>b.name?1:-1);
   const sc={Completed:'badge-green','At Risk':'badge-amber',Delayed:'badge-red','On Track':'badge-blue'};
-  let html=list.map(p=>`<tr>
-    <td style="font-weight:700;color:var(--p3)">${p.name}${p.partner?`<div style="font-size:9px;color:var(--muted)">Partner: ${p.partner}</div>`:''}</td>
-    <td><span class="badge badge-gray">${p.category}</span></td>
+  let html=list.map(p=>`<tr style="cursor:pointer" onclick="openProjectDetail(${p.id})">
+    <td style="font-weight:700;color:var(--p3)">${p.name}<span title="Click row for details" style="display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:var(--p8);color:#fff;font-size:8px;font-weight:800;margin-left:5px;vertical-align:middle;flex-shrink:0;cursor:pointer">i</span>${p.partner?`<div style="font-size:9px;color:var(--muted)">Partner: ${p.partner}</div>`:''}</td>
     <td style="font-size:10px">${p.start}</td><td style="font-size:10px">${p.end}</td>
     <td style="min-width:90px"><div class="progress-bar"><div class="progress-fill" style="width:${p.progress}%;background:var(--p1)"></div></div><span style="font-size:9px;color:var(--muted)">${p.progress}%</span></td>
     <td><span class="badge ${sc[p.status]||'badge-gray'}">${p.status}</span></td>
     <td style="font-size:10px">${p.lead}</td>
-    <td style="white-space:nowrap"><button class="exp-btn" onclick="openProjectDetail(${p.id})">Detail</button><button class="exp-btn" onclick="editProject(${p.id})">✎</button></td>
+    <td style="white-space:nowrap" onclick="event.stopPropagation()"><button class="exp-btn" onclick="editProject(${p.id})">✎</button></td>
   </tr>`).join('');
-  document.getElementById('proj-tbody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted)">No projects match filter</td></tr>';
+  document.getElementById('proj-tbody').innerHTML=html||'<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">No projects match filter</td></tr>';
 }
 
 function openProjectDetail(id){
@@ -1290,10 +1489,23 @@ function openProjectDetail(id){
   <div><div class="progress-bar" style="height:10px;border-radius:5px;margin-bottom:4px"><div class="progress-fill" style="width:${p.progress}%;background:var(--p1)"></div></div><div style="font-size:10px;color:var(--muted)">${p.progress}% Complete</div></div>`;
   if(p.desc) html+=`<div style="margin:12px 0;font-size:11px;color:var(--muted);line-height:1.6;padding:10px;background:#fdf9f6;border-radius:6px">${p.desc}</div>`;
   if(p.milestones&&p.milestones.length){
-    html+=`<div class="section-divider">Milestones</div><div>`;
+    const todayStr=TODAY.toISOString().slice(0,10);
+    html+=`<div class="section-divider">Milestones (${p.milestones.filter(m=>m.pct===100).length}/${p.milestones.length} done)</div><div>`;
     p.milestones.forEach(m=>{
-      const past=m.date<TODAY.toISOString().slice(0,10);
-      html+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0ede8"><div style="width:8px;height:8px;border-radius:50%;background:${past?'var(--ok)':'var(--p6)'}"></div><div style="font-size:11px;font-weight:600">${m.name}</div><div style="margin-left:auto;font-size:10px;color:${past?'var(--ok)':'var(--muted)'}">${m.date} ${past?'✓':''}</div></div>`;
+      const past=m.date<todayStr;
+      const pct=m.pct;
+      let dot,badge,dateColor;
+      if(pct===100){dot='var(--ok)';badge=`<span class="badge badge-green" style="flex-shrink:0">Done ✓</span>`;dateColor='var(--ok)';}
+      else if(pct>0&&past){dot='var(--risk)';badge=`<span class="badge badge-red" style="flex-shrink:0">${pct}% — Overdue</span>`;dateColor='var(--risk)';}
+      else if(pct>0){dot='var(--warn)';badge=`<span class="badge badge-amber" style="flex-shrink:0">${pct}%</span>`;dateColor='var(--warn)';}
+      else if(past){dot='var(--risk)';badge=`<span class="badge badge-red" style="flex-shrink:0">Overdue</span>`;dateColor='var(--risk)';}
+      else{dot='var(--p8)';badge=`<span class="badge badge-gray" style="flex-shrink:0">Not Started</span>`;dateColor='var(--muted)';}
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0ede8">
+        <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0"></div>
+        <div style="flex:1;font-size:11px;font-weight:600;min-width:0">${m.name}</div>
+        ${badge}
+        <div style="font-size:10px;color:${dateColor};white-space:nowrap;flex-shrink:0">${m.date}</div>
+      </div>`;
     });
     html+=`</div>`;
   }
@@ -1309,10 +1521,15 @@ function openProjectDetail(id){
 
 // ═══════════════ TIMELINE ═══════════════
 function renderTimeline(){
-  const allStart=new Date('2023-10-01');const allEnd=new Date('2026-12-31');
+  const fromVal=(document.getElementById('gantt-from')?.value||'2023-10')+'-01';
+  const toRaw=document.getElementById('gantt-to')?.value||'2026-12';
+  const [toY,toM]=toRaw.split('-').map(Number);
+  const toVal=new Date(toY,toM,0).toISOString().slice(0,10); // last day of selected month
+  const allStart=new Date(fromVal);const allEnd=new Date(toVal);
   const totalMs=allEnd-allStart;
+  if(totalMs<=0){document.getElementById('gantt-wrap').innerHTML='<div style="padding:20px;color:var(--muted);font-size:11px">Invalid date range — "From" must be before "To".</div>';return;}
   const months=[];
-  let cur=new Date('2023-10-01');
+  let cur=new Date(fromVal);
   while(cur<=allEnd){months.push({y:cur.getFullYear(),m:cur.getMonth()});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
   
   let hdr='<div class="gantt-header">';
@@ -1347,25 +1564,76 @@ function renderTimeline(){
 
 // ═══════════════ NOTES ═══════════════
 let noteTypeFilter='all';
+let notesProgExpanded=false, notesCrExpanded=false;
+
 function renderNoteItem(n){
   const cls={risk:'note-risk',issue:'note-issue',approval:'note-approval',info:'note-info'}[n.type]||'note-info';
   const icon={risk:'🔴',issue:'🟡',approval:'🟢',info:'🔵'}[n.type]||'🔵';
   return `<div class="${cls} note-item">${icon} <strong>${n.proj}</strong> — ${n.desc}<div class="note-meta">${n.by} · ${n.date}</div></div>`;
 }
+
+// A note is "program-level" if its proj exactly matches a sector project name
+function isProgNote(n){return sectorProjects.some(p=>p.name===n.proj);}
+
+function renderNotesList(listId,moreId,btnId,list,expanded){
+  const moreEl=document.getElementById(moreId);
+  const btn=document.getElementById(btnId);
+  const visible=expanded?list:list.slice(0,6);
+  const remaining=list.length-6;
+  if(moreEl){
+    if(list.length>6){moreEl.style.display='block';if(btn) btn.textContent=expanded?'Show less':`Show ${remaining} more`;}
+    else moreEl.style.display='none';
+  }
+  document.getElementById(listId).innerHTML=visible.map(renderNoteItem).join('')||
+    '<div style="color:var(--muted);font-size:11px;padding:8px 0">No items match the current filter.</div>';
+}
+
 function renderNotes(){
-  const list=noteTypeFilter==='all'?notes:notes.filter(n=>n.type===noteTypeFilter);
-  document.getElementById('notes-list').innerHTML=list.map(renderNoteItem).join('')||'<div style="color:var(--muted);font-size:11px;padding:10px">No items found.</div>';
+  // Populate project filter
+  const projSel=document.getElementById('notes-proj-filter');
+  if(projSel){
+    const v=projSel.value;
+    projSel.innerHTML='<option value="">All Projects</option>'+sectorProjects.map(p=>`<option value="${p.name}"${p.name===v?' selected':''}>${p.name}</option>`).join('');
+  }
+  // Populate CR filter — keyed by exact proj value used in notes
+  const crSel=document.getElementById('notes-cr-filter');
+  if(crSel){
+    const v=crSel.value;
+    const crIds=[...new Set(notes.filter(n=>!isProgNote(n)).map(n=>n.proj))].filter(Boolean).sort();
+    crSel.innerHTML='<option value="">All CRs</option>'+crIds.map(id=>`<option value="${id}"${id===v?' selected':''}>${id}</option>`).join('');
+  }
+
+  const projFilter=projSel?.value||'';
+  const crFilter=crSel?.value||'';
+
+  let all=[...notes];
+  if(noteTypeFilter!=='all') all=all.filter(n=>n.type===noteTypeFilter);
+
+  const progNotes=all.filter(isProgNote).filter(n=>!projFilter||n.proj===projFilter);
+  const crNotes=all.filter(n=>!isProgNote(n)).filter(n=>!crFilter||n.proj===crFilter);
+
+  renderNotesList('notes-prog-list','notes-prog-more','notes-prog-btn',progNotes,notesProgExpanded);
+  renderNotesList('notes-cr-list','notes-cr-more','notes-cr-btn',crNotes,notesCrExpanded);
+
+  // Summary counters (always from full notes list)
   const risk=notes.filter(n=>n.type==='risk').length;
   const issue=notes.filter(n=>n.type==='issue').length;
   const approval=notes.filter(n=>n.type==='approval').length;
+  const info=notes.filter(n=>n.type==='info').length;
   document.getElementById('risk-summary-content').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
       <div style="background:#fff5f5;border-radius:8px;padding:14px;text-align:center;border:1px solid #ffd0d0"><div style="font-size:22px;font-weight:800;color:var(--risk)">${risk}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Risks</div></div>
       <div style="background:#fff8e1;border-radius:8px;padding:14px;text-align:center;border:1px solid #ffe082"><div style="font-size:22px;font-weight:800;color:var(--warn)">${issue}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Issues</div></div>
       <div style="background:#e8f5e9;border-radius:8px;padding:14px;text-align:center;border:1px solid #a5d6a7"><div style="font-size:22px;font-weight:800;color:var(--ok)">${approval}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Needs Approval</div></div>
-      <div style="background:#f5f5f5;border-radius:8px;padding:14px;text-align:center;border:1px solid #e0e0e0"><div style="font-size:22px;font-weight:800;color:var(--info)">${notes.filter(n=>n.type==='info').length}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Notes</div></div>
+      <div style="background:#f5f5f5;border-radius:8px;padding:14px;text-align:center;border:1px solid #e0e0e0"><div style="font-size:22px;font-weight:800;color:var(--info)">${info}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Notes</div></div>
     </div>
-    <div style="margin-top:12px;font-size:10px;color:var(--muted);font-style:italic">Showing ${notes.length} total items across all projects and CRs.</div>`;
+    <div style="margin-top:10px;font-size:10px;color:var(--muted);font-style:italic">${notes.length} total — ${progNotes.length} program / ${crNotes.length} CR (matching current filter).</div>`;
+}
+
+function toggleNotes(sec){
+  if(sec==='prog') notesProgExpanded=!notesProgExpanded;
+  else notesCrExpanded=!notesCrExpanded;
+  renderNotes();
 }
 function filterNotes(type,el){noteTypeFilter=type;document.querySelectorAll('#page-risks .cat-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');renderNotes();}
 
@@ -1431,54 +1699,69 @@ function renderCROverview(){
   });
   document.getElementById('status-legend').innerHTML=ALL_STATUSES.map((st,i)=>stCounts[i]>0?`<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px"><div style="width:9px;height:9px;border-radius:2px;background:${ST_COLORS_MAP[st]};flex-shrink:0"></div><span style="font-size:9px;flex:1">${st}</span><strong style="font-size:9px">${stCounts[i]}</strong><span style="font-size:8px;color:var(--muted);margin-left:2px">${Math.round(stCounts[i]/stTotal*100)}%</span></div>`:'').join('');
 
-  // CR Phase Status detail table — replaces old classification × status stacked bars
-  // Shows: per phase row → Done / In Progress / Pending counts + mini bar
-  const PHASE_STATUS_LABELS=['Phase 1 — BA (CSI Team)','Phase 2 — Dev (TT Team)','Phase 3 — QA (QA Team)','Phase 4 — UAT (QA Team)','Phase 5 — Deploy (TT Team)'];
-  const total=crs.length||1;
-  let psHtml=`<div style="overflow-x:auto">
-    <div style="display:grid;grid-template-columns:200px 1fr 60px 60px 60px;gap:0;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:8px">
-      <div>Phase / Team</div><div>Progress</div><div style="text-align:center;color:#27ae60">Done</div><div style="text-align:center;color:${PHASE_COLORS[0]}">Active</div><div style="text-align:center;color:#aaa">Pending</div>
-    </div>`;
-  PHASE_STATUS_LABELS.forEach((label,i)=>{
-    const done=crs.filter(c=>c.phases[i]&&c.phases[i].status==='Done').length;
-    const inp=crs.filter(c=>c.phases[i]&&c.phases[i].status==='In Progress').length;
-    const pend=crs.filter(c=>c.phases[i]&&c.phases[i].status==='Pending').length;
-    const dW=Math.round(done/total*100),ipW=Math.round(inp/total*100),pW=Math.round(pend/total*100);
-    psHtml+=`<div style="display:grid;grid-template-columns:200px 1fr 60px 60px 60px;gap:0;align-items:center;padding:8px 0;border-bottom:1px solid #f5efe8">
-      <div>
-        <div style="font-size:10px;font-weight:700;color:${PHASE_COLORS[i]}">${label}</div>
-      </div>
-      <div style="padding-right:16px">
-        <div style="height:14px;border-radius:3px;overflow:hidden;display:flex;background:#f0ede8">
-          ${done>0?`<div style="width:${dW}%;background:#27ae60;height:100%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff">${done}</div>`:''}
-          ${inp>0?`<div style="width:${ipW}%;background:${PHASE_COLORS[i]};height:100%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff">${inp}</div>`:''}
-          ${pend>0?`<div style="width:${pW}%;background:#ddd;height:100%;display:flex;align-items:center;justify-content:center;font-size:8px;color:#aaa">${pend}</div>`:''}
-        </div>
-      </div>
-      <div style="text-align:center;font-size:13px;font-weight:800;color:#27ae60">${done}</div>
-      <div style="text-align:center;font-size:13px;font-weight:800;color:${PHASE_COLORS[i]}">${inp}</div>
-      <div style="text-align:center;font-size:13px;font-weight:800;color:#aaa">${pend}</div>
-    </div>`;
+  // Projects by Classification and Status — stacked horizontal bar (mirrors overview chart)
+  document.getElementById('cr-dash-cls-label').textContent='Total: '+crs.length+' CRs';
+  const CDS_STATUSES=['Analysis','Deployed','Development','Development Queued','In Pipeline','On Hold','Ready for Deployment','Testing'];
+  const CDS_COLORS=['#A29475','#27ae60','#782D55','#8B556A','#C1BBA8','#e67e22','#5C243F','#E0AC92'];
+  const cdsCatKeys=Object.keys(CR_CATS);
+  const cdsCatNames=cdsCatKeys.map(k=>CR_CATS[k]);
+  if(crDashClassStatusChartInst) crDashClassStatusChartInst.destroy();
+  crDashClassStatusChartInst=new Chart(document.getElementById('crDashClassStatusChart'),{
+    type:'bar',
+    data:{
+      labels:cdsCatNames,
+      datasets:CDS_STATUSES.map((st,si)=>({
+        label:st,
+        data:cdsCatKeys.map(cat=>{
+          const catCrs=crs.filter(c=>c.category===cat);
+          return catCrs.length?Math.round(catCrs.filter(c=>c.projectStatus===st).length/catCrs.length*100):0;
+        }),
+        backgroundColor:CDS_COLORS[si],
+        borderWidth:0,
+        borderRadius:2,
+      }))
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        x:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{size:9,family:'Cairo'}},grid:{color:'#f0ede8'}},
+        y:{stacked:true,ticks:{font:{size:9,family:'Cairo'}}}
+      },
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:9,family:'Cairo'},boxWidth:10,padding:6}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.x}%`}}
+      }
+    }
   });
-  // High Risk flag count
   const highRiskCount=crs.filter(c=>c.delayRisk).length;
-  psHtml+=`<div style="margin-top:10px;padding:8px 12px;background:#fff5f5;border-radius:6px;border-left:3px solid var(--risk);display:flex;align-items:center;gap:10px">
-    <span style="font-size:18px;font-weight:800;color:var(--risk)">${highRiskCount}</span>
-    <span style="font-size:10px;color:var(--risk);font-weight:600">High Risk CRs (delay flag) — behind expected end date by ≥1 week</span>
-  </div>`;
-  psHtml+='</div>';
-  document.getElementById('cr-phase-status-detail').innerHTML=psHtml;
+  document.getElementById('cr-dash-high-risk-row').innerHTML=`<div style="padding:8px 12px;background:#fff5f5;border-radius:6px;border-left:3px solid var(--risk);display:flex;align-items:center;gap:10px"><span style="font-size:18px;font-weight:800;color:var(--risk)">${highRiskCount}</span><span style="font-size:10px;color:var(--risk);font-weight:600">High Risk CRs flagged — behind expected due date by ≥${DELAY_THRESHOLD_DAYS} days</span></div>`;
 
-  // SOW / Training / Marketing flag charts
-  const sowY=crs.filter(c=>c.sow==='Yes').length,sowN=crs.filter(c=>c.sow==='No').length;
+  // SOW / Training / Marketing flag charts — normalize messy real-world values
+  const normSow=c=>{const s=(c.crSowStatus||'').toLowerCase();return s==='approved'?'Approved':s.includes('pending')||s.includes('progress')?'Pending':'N/A';};
+  const sowApproved=crs.filter(c=>normSow(c)==='Approved').length;
+  const sowPending=crs.filter(c=>normSow(c)==='Pending').length;
+  const sowNA=crs.filter(c=>normSow(c)==='N/A').length;
   if(sowChartInst) sowChartInst.destroy();
-  sowChartInst=new Chart(document.getElementById('sowChart'),{type:'doughnut',data:{labels:['Approved','Not Approved'],datasets:[{data:[sowY,sowN],backgroundColor:['#27ae60','#c0392b'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:9,family:'Cairo'},boxWidth:8}}}}});
-  const trY=crs.filter(c=>c.training==='Yes').length,trN=crs.filter(c=>c.training==='No').length;
+  sowChartInst=new Chart(document.getElementById('sowChart'),{type:'doughnut',data:{labels:['Approved','Pending','N/A'],datasets:[{data:[sowApproved,sowPending,sowNA],backgroundColor:['#27ae60','#e67e22','#C1BBA8'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:9,family:'Cairo'},boxWidth:8}}}}});
+
+  const normTrain=t=>{if(!t||t===''||t==='-') return 'N/A';const l=t.toLowerCase();if(l==='done') return 'Done';if(l==='na'||l==='n/a'||l.includes('not invite')) return 'N/A';if(l.includes('progress')) return 'In Progress';if(l.includes('not started')) return 'Not Started';return 'N/A';};
+  const trDone=crs.filter(c=>normTrain(c.training)==='Done').length;
+  const trInProg=crs.filter(c=>normTrain(c.training)==='In Progress').length;
+  const trNotStart=crs.filter(c=>normTrain(c.training)==='Not Started').length;
+  const trNA=crs.filter(c=>normTrain(c.training)==='N/A').length;
   if(trainChartInst) trainChartInst.destroy();
-  trainChartInst=new Chart(document.getElementById('trainChart'),{type:'doughnut',data:{labels:['Done','Pending'],datasets:[{data:[trY,trN],backgroundColor:['#27ae60','#e67e22'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:9,family:'Cairo'},boxWidth:8}}}}});
-  const mkNA=crs.filter(c=>c.marketing==='NA').length,mkInt=crs.filter(c=>c.marketing==='Internal Post').length,mkExt=crs.filter(c=>c.marketing==='External Post').length;
+  trainChartInst=new Chart(document.getElementById('trainChart'),{type:'doughnut',data:{labels:['Done','In Progress','Not Started','N/A'],datasets:[{data:[trDone,trInProg,trNotStart,trNA],backgroundColor:['#27ae60','#8B556A','#e67e22','#C1BBA8'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:9,family:'Cairo'},boxWidth:8}}}}});
+
+  const mkPublished=crs.filter(c=>normMktFlag(c.marketing)==='Published').length;
+  const mkInternal=crs.filter(c=>normMktFlag(c.marketing)==='Internal').length;
+  const mkExternal=crs.filter(c=>normMktFlag(c.marketing)==='External').length;
+  const mkInProg=crs.filter(c=>normMktFlag(c.marketing)==='In Progress').length;
+  const mkOnHold=crs.filter(c=>normMktFlag(c.marketing)==='On Hold').length;
+  const mkNA2=crs.filter(c=>normMktFlag(c.marketing)==='N/A').length;
   if(mktChartInst) mktChartInst.destroy();
-  mktChartInst=new Chart(document.getElementById('mktChart'),{type:'doughnut',data:{labels:['N/A','Internal','External'],datasets:[{data:[mkNA,mkInt,mkExt],backgroundColor:['#C1BBA8','#8B556A','#782D55'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:9,family:'Cairo'},boxWidth:8}}}}});
+  mktChartInst=new Chart(document.getElementById('mktChart'),{type:'doughnut',data:{labels:['Published','Internal','External','In Progress','On Hold','N/A'],datasets:[{data:[mkPublished,mkInternal,mkExternal,mkInProg,mkOnHold,mkNA2],backgroundColor:['#27ae60','#8B556A','#782D55','#5C243F','#e67e22','#C1BBA8'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:9,family:'Cairo'},boxWidth:8}}}}});
 }
 
 // ═══════════════ CR LIST ═══════════════
@@ -1533,7 +1816,8 @@ function renderCRListTable(){
 
     const sowFlag=`<span class="flag ${cr.sow==='Yes'?'flag-yes':'flag-no'}">${cr.sow==='Yes'?'✓':cr.sow}</span>`;
     const trainFlag=`<span class="flag ${cr.training==='Yes'?'flag-yes':'flag-no'}">${cr.training==='Yes'?'✓':cr.training}</span>`;
-    const mktFlag=cr.marketing==='NA'?`<span class="flag flag-na">N/A</span>`:cr.marketing==='Internal Post'?`<span class="flag flag-int">Internal</span>`:`<span class="flag flag-ext">External</span>`;
+    const _mktN=normMktFlag(cr.marketing);
+    const mktFlag=_mktN==='N/A'?`<span class="flag flag-na">N/A</span>`:_mktN==='Internal'?`<span class="flag flag-int">Internal</span>`:_mktN==='Published'?`<span class="flag flag-yes">Published</span>`:_mktN==='In Progress'?`<span class="flag flag-int">In Prog</span>`:_mktN==='On Hold'?`<span class="flag flag-no">On Hold</span>`:`<span class="flag flag-ext">External</span>`;
     const riskFlag=cr.delayRisk?`<span class="flag flag-no">⚠ Yes</span>`:`<span style="color:#ccc;font-size:9px">—</span>`;
 
     return `<tr>
@@ -1793,15 +2077,16 @@ function allocPieChart(canvasId,legendId,memberMap,chartRef,colorBase){
 }
 
 function renderAllocation(){
-  const stBadge=(s,ok)=>s?`<span class="badge ${s.toLowerCase()==='done'?'badge-green':s.toLowerCase().includes('progress')?'badge-blue':s.toLowerCase().includes('hold')?'badge-amber':'badge-gray'}">${s}</span>`:'<span class="badge badge-gray">—</span>';
+  const stBadge=s=>s?`<span class="badge ${s.toLowerCase()==='done'?'badge-green':s.toLowerCase().includes('progress')||s.toLowerCase()==='testing'?'badge-blue':s.toLowerCase().includes('hold')?'badge-amber':'badge-gray'}">${s}</span>`:'<span class="badge badge-gray">—</span>';
+  const statusFilter=document.getElementById('alloc-status-filter')?.value||'';
+  const crList=statusFilter?crProjects.filter(c=>c.projectStatus===statusFilter):crProjects;
 
   // ── CSI ──
   const csiMap={};
   let csiHtml='';
-  crProjects.forEach(cr=>{
+  crList.forEach(cr=>{
     if(!cr.ba) return;
-    const members=cr.ba.split(',').map(m=>m.trim()).filter(Boolean);
-    members.forEach(m=>{csiMap[m]=(csiMap[m]||0)+1;});
+    cr.ba.split(',').map(m=>m.trim()).filter(Boolean).forEach(m=>{csiMap[m]=(csiMap[m]||0)+1;});
     csiHtml+=`<tr>
       <td style="font-size:10px;font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
       <td style="font-size:10px;max-width:180px;white-space:normal;line-height:1.3">${cr.name}</td>
@@ -1812,14 +2097,14 @@ function renderAllocation(){
       <td><span style="font-size:9px;font-weight:700;color:${cr.complexity==='High'?'var(--risk)':cr.complexity==='Low'?'var(--ok)':'var(--muted)'}">${cr.complexity||'—'}</span></td>
     </tr>`;
   });
-  document.getElementById('alloc-csi-body').innerHTML=csiHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">No data</td></tr>`;
+  document.getElementById('alloc-csi-body').innerHTML=csiHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">${statusFilter?'No CRs with status "'+statusFilter+'"':'No data'}</td></tr>`;
   csiAllocChart=allocPieChart('csi-alloc-chart','csi-alloc-legend',csiMap,csiAllocChart,'#880e4f');
 
   // ── TT ──
   const ttMap={};
   let ttHtml='';
-  crProjects.filter(cr=>cr.ttMembers||cr.devStatus).forEach(cr=>{
-    if(cr.ttMembers){const ms=cr.ttMembers.split(',').map(m=>m.trim()).filter(Boolean);ms.forEach(m=>{ttMap[m]=(ttMap[m]||0)+1;});}
+  crList.filter(cr=>cr.ttMembers||cr.devStatus).forEach(cr=>{
+    if(cr.ttMembers) cr.ttMembers.split(',').map(m=>m.trim()).filter(Boolean).forEach(m=>{ttMap[m]=(ttMap[m]||0)+1;});
     ttHtml+=`<tr>
       <td style="font-size:10px;font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
       <td style="font-size:10px;max-width:160px;white-space:normal;line-height:1.3">${cr.name}</td>
@@ -1830,14 +2115,14 @@ function renderAllocation(){
       <td style="font-size:10px;color:var(--muted)">${cr.deploymentDue||'—'}</td>
     </tr>`;
   });
-  document.getElementById('alloc-tt-body').innerHTML=ttHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">No data</td></tr>`;
+  document.getElementById('alloc-tt-body').innerHTML=ttHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">${statusFilter?'No CRs with status "'+statusFilter+'"':'No data'}</td></tr>`;
   ttAllocChart=allocPieChart('tt-alloc-chart','tt-alloc-legend',ttMap,ttAllocChart,'#1a237e');
 
   // ── QA ──
   const qaMap={};
   let qaHtml='';
-  crProjects.filter(cr=>cr.qaMember||cr.internalTestStatus||cr.uatStatus).forEach(cr=>{
-    if(cr.qaMember){const ms=cr.qaMember.split(',').map(m=>m.trim()).filter(Boolean);ms.forEach(m=>{qaMap[m]=(qaMap[m]||0)+1;});}
+  crList.filter(cr=>cr.qaMember||cr.internalTestStatus||cr.uatStatus).forEach(cr=>{
+    if(cr.qaMember) cr.qaMember.split(',').map(m=>m.trim()).filter(Boolean).forEach(m=>{qaMap[m]=(qaMap[m]||0)+1;});
     qaHtml+=`<tr>
       <td style="font-size:10px;font-weight:700;color:var(--p1)">${cr.crNo||cr.id}</td>
       <td style="font-size:10px;max-width:160px;white-space:normal;line-height:1.3">${cr.name}</td>
@@ -1848,7 +2133,7 @@ function renderAllocation(){
       <td>${stBadge(cr.projectStatus)}</td>
     </tr>`;
   });
-  document.getElementById('alloc-qa-body').innerHTML=qaHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">No data</td></tr>`;
+  document.getElementById('alloc-qa-body').innerHTML=qaHtml||`<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted)">${statusFilter?'No CRs with status "'+statusFilter+'"':'No data'}</td></tr>`;
   qaAllocChart=allocPieChart('qa-alloc-chart','qa-alloc-legend',qaMap,qaAllocChart,'#004d40');
 }
 
@@ -1939,10 +2224,29 @@ function deleteCR(id){
   renderCRList();
 }
 
+function addMilestoneRow(name='',date='',pct=0){
+  const div=document.createElement('div');
+  div.style.cssText='display:grid;grid-template-columns:1fr 130px 75px 28px;gap:5px;margin-bottom:5px;align-items:center';
+  div.innerHTML=`<input type="text" placeholder="Milestone name" value="${name.replace(/"/g,'&quot;')}" style="padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:10px;font-family:'Cairo',sans-serif">
+    <input type="date" value="${date}" style="padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:10px;font-family:'Cairo',sans-serif">
+    <input type="number" min="0" max="100" value="${pct}" placeholder="%" style="padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:10px;font-family:'Cairo',sans-serif">
+    <button type="button" onclick="this.closest('div').remove()" style="background:#ffebee;border:1px solid #ffc7c7;color:var(--risk);cursor:pointer;border-radius:4px;font-weight:800;width:24px;height:24px;font-size:13px;line-height:1;padding:0">×</button>`;
+  document.getElementById('f-milestone-rows').appendChild(div);
+}
+
+function getMilestoneRows(){
+  return Array.from(document.getElementById('f-milestone-rows').children).map(row=>{
+    const inputs=row.querySelectorAll('input');
+    return{name:(inputs[0]?.value||'').trim(),date:inputs[1]?.value||'',pct:parseInt(inputs[2]?.value)||0};
+  }).filter(m=>m.name&&m.date);
+}
+
 function saveProject(){
   const editId=document.getElementById('f-edit-id').value;
-  const milestones=document.getElementById('f-milestones').value.split('\n').filter(l=>l.includes('|')).map(l=>{const[n,d]=l.split('|');return{name:(n||'').trim(),date:(d||'').trim()};});
-  const pData={name:document.getElementById('f-name').value.trim()||'New Project',category:document.getElementById('f-cat').value,start:document.getElementById('f-start').value||'2025-01-01',end:document.getElementById('f-end').value||'2026-12-31',progress:parseInt(document.getElementById('f-progress').value)||0,status:document.getElementById('f-status').value,lead:document.getElementById('f-lead').value,partner:document.getElementById('f-partner').value,milestones,desc:document.getElementById('f-desc').value};
+  const milestones=getMilestoneRows();
+  const statusVal=document.getElementById('f-status').value;
+  const pData={name:document.getElementById('f-name').value.trim()||'New Project',category:document.getElementById('f-cat').value,start:document.getElementById('f-start').value||'2025-01-01',end:document.getElementById('f-end').value||'2026-12-31',progress:parseInt(document.getElementById('f-progress').value)||0,lead:document.getElementById('f-lead').value,partner:document.getElementById('f-partner').value,milestones,desc:document.getElementById('f-desc').value};
+  pData.status = statusVal==='auto' ? computeProjectStatus({...pData,milestones}) : statusVal;
   if(editId){const idx=sectorProjects.findIndex(p=>p.id===parseInt(editId));if(idx>=0) sectorProjects[idx]={...sectorProjects[idx],...pData};}
   else{pData.id=sectorProjects.length+1;sectorProjects.push(pData);}
   closeModal('add-project');saveData();renderOverview();renderProjects();
@@ -1950,7 +2254,7 @@ function saveProject(){
 
 function editProject(id){
   const p=sectorProjects.find(x=>x.id===id);if(!p) return;
-  document.getElementById('modal-proj-title').textContent='Edit Project';
+  document.getElementById('modal-proj-title').textContent='Edit Project — '+p.name;
   document.getElementById('f-edit-id').value=id;
   document.getElementById('f-name').value=p.name;
   document.getElementById('f-cat').value=p.category;
@@ -1958,9 +2262,10 @@ function editProject(id){
   document.getElementById('f-end').value=p.end;
   document.getElementById('f-progress').value=p.progress;
   document.getElementById('f-status').value=p.status;
-  document.getElementById('f-lead').value=p.lead;
+  document.getElementById('f-lead').value=p.lead||'';
   document.getElementById('f-partner').value=p.partner||'';
-  document.getElementById('f-milestones').value=(p.milestones||[]).map(m=>m.name+'|'+m.date).join('\n');
+  document.getElementById('f-milestone-rows').innerHTML='';
+  (p.milestones||[]).forEach(m=>addMilestoneRow(m.name,m.date,m.pct||0));
   document.getElementById('f-desc').value=p.desc||'';
   openModal('add-project');
 }
